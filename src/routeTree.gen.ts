@@ -10,33 +10,73 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChaptersRouteImport } from './routes/chapters'
+import { Route as CourseRouteImport } from './routes/course'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as ChaptersIdRouteImport } from './routes/chapters.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChaptersRoute = ChaptersRouteImport.update({
+  id: '/chapters',
+  path: '/chapters',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourseRoute = CourseRouteImport.update({
+  id: '/course',
+  path: '/course',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChaptersIdRoute = ChaptersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ChaptersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/chapters': typeof ChaptersRouteWithChildren
+  '/course': typeof CourseRoute
+  '/resources': typeof ResourcesRoute
+  '/chapters/$id': typeof ChaptersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/chapters': typeof ChaptersRouteWithChildren
+  '/course': typeof CourseRoute
+  '/resources': typeof ResourcesRoute
+  '/chapters/$id': typeof ChaptersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/chapters': typeof ChaptersRouteWithChildren
+  '/course': typeof CourseRoute
+  '/resources': typeof ResourcesRoute
+  '/chapters/$id': typeof ChaptersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/chapters' | '/course' | '/resources' | '/chapters/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/chapters' | '/course' | '/resources' | '/chapters/$id'
+  id:
+    '__root__' | '/' | '/chapters' | '/course' | '/resources' | '/chapters/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChaptersRoute: typeof ChaptersRouteWithChildren
+  CourseRoute: typeof CourseRoute
+  ResourcesRoute: typeof ResourcesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +88,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chapters': {
+      id: '/chapters'
+      path: '/chapters'
+      fullPath: '/chapters'
+      preLoaderRoute: typeof ChaptersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course': {
+      id: '/course'
+      path: '/course'
+      fullPath: '/course'
+      preLoaderRoute: typeof CourseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chapters/$id': {
+      id: '/chapters/$id'
+      path: '/$id'
+      fullPath: '/chapters/$id'
+      preLoaderRoute: typeof ChaptersIdRouteImport
+      parentRoute: typeof ChaptersRoute
+    }
   }
 }
 
+interface ChaptersRouteChildren {
+  ChaptersIdRoute: typeof ChaptersIdRoute
+}
+
+const ChaptersRouteChildren: ChaptersRouteChildren = {
+  ChaptersIdRoute: ChaptersIdRoute,
+}
+
+const ChaptersRouteWithChildren = ChaptersRoute._addFileChildren(
+  ChaptersRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChaptersRoute: ChaptersRouteWithChildren,
+  CourseRoute: CourseRoute,
+  ResourcesRoute: ResourcesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
