@@ -60,7 +60,7 @@ function Index() {
 
   return (
     <main className="overflow-hidden">
-      <section className="relative border-b border-border/60 px-5 pb-24 pt-20 sm:px-8 sm:pb-32 sm:pt-28 lg:pt-36">
+      <section className="relative border-b border-border/60 px-5 pb-16 pt-14 sm:px-8 sm:pb-32 sm:pt-28 lg:pt-36">
         <div className="page-grid pointer-events-none absolute inset-0 opacity-70" />
         <div className="pointer-events-none absolute left-1/2 top-0 h-[32rem] w-[min(54rem,95vw)] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]" />
         <motion.div
@@ -69,7 +69,7 @@ function Index() {
           transition={{ duration: 0.65, ease: "easeOut" }}
           className="relative mx-auto max-w-5xl text-center"
         >
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3.5 py-1.5 font-mono text-[0.6875rem] uppercase text-muted-foreground backdrop-blur-xl">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3.5 py-1.5 font-mono text-[0.6875rem] uppercase text-muted-foreground backdrop-blur-xl sm:mb-8">
             <Sparkles className="size-3.5 text-cyan" aria-hidden="true" />
             The professional guide to agentic engineering
           </div>
@@ -98,7 +98,7 @@ function Index() {
         </motion.div>
       </section>
 
-      <section className="px-5 py-24 sm:px-8 sm:py-32">
+      <section className="px-5 py-16 sm:px-8 sm:py-32">
         <div className="mx-auto max-w-7xl">
           <motion.div {...reveal} className="max-w-2xl">
             <p className="mb-4 font-mono text-xs uppercase text-cyan">Inside the guide</p>
