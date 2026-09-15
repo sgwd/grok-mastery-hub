@@ -120,7 +120,7 @@ function CoursePage() {
             {/* CTAs */}
             <div className="mt-9 flex flex-col items-start gap-3 sm:flex-row">
               <Button asChild size="lg">
-                <Link to="/chapters/1">
+                <Link to="/chapters/$id" params={{ id: "1" }}>
                   <PlayCircle /> Start with Chapter 1
                 </Link>
               </Button>
@@ -228,7 +228,7 @@ function CoursePage() {
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link to="/chapters/1">
+              <Link to="/chapters/$id" params={{ id: "1" }}>
                 Start with Chapter 1 <ArrowRight />
               </Link>
             </Button>
