@@ -17,32 +17,100 @@ import { cn } from "@/lib/utils";
 type Section = { id: string; label: string };
 
 const sections: Section[] = [
-  { id: "overview", label: "Chapter overview" },
-  { id: "principles", label: "Core theoretical principles" },
-  { id: "agentic-loop", label: "The agentic loop" },
-  { id: "implementation", label: "Deep dive implementation" },
-  { id: "production", label: "Production considerations" },
-  { id: "takeaways", label: "Key takeaways" },
+  { id: "overview", label: "Chapter Overview & Learning Objectives" },
+  { id: "principles", label: "Core Theoretical Principles & Architecture" },
+  { id: "implementation", label: "Deep Dive Implementation" },
+  { id: "recipes", label: "Real-World Recipes & Practical Scenario" },
+  { id: "optimization", label: "Edge Cases, Troubleshooting & Optimization" },
+  { id: "summary", label: "Chapter Summary & Next Steps" },
 ];
 
-const agentCode = `type AgentState = {
+const loopDiagram = `┌─────────────────────────────────────────────────────────┐
+│  1. OBSERVE                                             │
+│     Goal + session state + latest tool results          │
+└───────────────────────┬─────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│  2. REASON                                              │
+│     Grok evaluates evidence, uncertainty, and progress  │
+└───────────────────────┬─────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│  3. DECIDE                                              │
+│     Answer, request clarification, or call a tool       │
+└───────────────────────┬─────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│  4. EXECUTE TOOL                                        │
+│     Host validates, authorizes, executes, and records   │
+└───────────────────────┬─────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────────┐
+│  5. OBSERVE RESULT                                      │
+│     Append structured output or error to session state  │
+└───────────────────────┬─────────────────────────────────┘
+                        ↓
+              Done? ── yes ──→ Final response
+                │
+                no
+                └────────────→ Repeat from REASON`;
+
+const agentCode = `type Observation = {
+  source: "user" | "tool"
+  content: unknown
+  recordedAt: string
+}
+
+type AgentState = {
+  sessionId: string
   goal: string
-  observations: string[]
-  attempts: number
+  observations: Observation[]
+  iteration: number
+  maxIterations: number
 }
 
 async function runAgent(state: AgentState) {
-  while (state.attempts < 6) {
-    const action = await grok.plan(state)
-    const result = await tools.execute(action)
-    state.observations.push(result)
+  while (state.iteration < state.maxIterations) {
+    const decision = await grok.respond({
+      reasoningEffort: "high",
+      messages: buildContext(state),
+      tools: serverToolSchemas,
+    })
 
-    if (await grok.isComplete(state)) return result
-    state.attempts += 1
+    if (decision.type === "final") return decision.content
+
+    const call = validateToolCall(decision.toolCall)
+    authorize(state.sessionId, call)
+    const result = await executeWithTimeout(call, 10_000)
+
+    state.observations.push({
+      source: "tool",
+      content: normalizeResult(result),
+      recordedAt: new Date().toISOString(),
+    })
+    state.iteration += 1
   }
 
-  throw new Error("Agent reached its iteration limit")
+  return escalate("Iteration budget exhausted", state)
 }`;
+
+const incidentRecipe = `const tools = {
+  getServiceHealth: readOnlyTool({ service: "string" }),
+  searchRecentLogs: readOnlyTool({
+    service: "string",
+    query: "string",
+    minutes: "number",
+  }),
+  createIncidentNote: approvalRequiredTool({
+    incidentId: "string",
+    summary: "string",
+  }),
+}
+
+// Keep the goal measurable and the permissions narrow.
+const goal =
+  "Identify the likely cause of elevated checkout errors, " +
+  "cite supporting observations, and propose a safe next action."`;
 
 function useScrollSpy(items: Section[], offset = 170) {
   const [active, setActive] = useState(items[0]?.id ?? "");
