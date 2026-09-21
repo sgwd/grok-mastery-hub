@@ -52,8 +52,8 @@ function ChapterPage() {
   return (
     <ChapterReader
       chapter={chapter}
-      previous={chapters[chapterIndex - 1]}
-      next={chapters[chapterIndex + 1]}
+      {...(chapters[chapterIndex - 1] ? { previous: chapters[chapterIndex - 1] } : {})}
+      {...(chapters[chapterIndex + 1] ? { next: chapters[chapterIndex + 1] } : {})}
     />
   );
 }
