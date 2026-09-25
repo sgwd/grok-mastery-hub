@@ -43,7 +43,7 @@ export const courseParts: CoursePart[] = [
     summary:
       "Establish the mental model. Understand what Grok is, how it reasons, and how to write prompts that hold up under real work.",
     chapters: [
-      { id: 1, number: "01", title: "Meet Grok", description: "Where xAI's models fit in the landscape and what makes them distinct." },
+      { id: 1, number: "01", title: "What Grok Is and How the Agentic Loop Works", description: "Understand Grok’s role in an agentic system and the controlled loop that turns reasoning into verifiable action." },
       { id: 2, number: "02", title: "How Language Models Reason", description: "The mechanics behind prediction, tokens, and the illusion of understanding." },
       { id: 3, number: "03", title: "Your First Prompt", description: "Anatomy of an effective prompt and the patterns that scale from day one." },
       { id: 4, number: "04", title: "Context Windows & Limits", description: "Work within token budgets and design around the edges of model memory." },
