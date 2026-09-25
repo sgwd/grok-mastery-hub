@@ -225,6 +225,9 @@ export function ChapterReader({
   const [mobileContentsOpen, setMobileContentsOpen] = useState(false);
   const isChapterOne = chapter.id === 1;
   const title = isChapterOne ? "What Grok Is and How the Agentic Loop Works" : chapter.title;
+  const description = isChapterOne
+    ? "Understand Grok’s role inside an agentic system, then build the controlled feedback loop that turns model reasoning into useful, verifiable action."
+    : chapter.description;
 
   return (
     <main className="relative overflow-clip">
@@ -245,9 +248,9 @@ export function ChapterReader({
         <header className="max-w-4xl border-b border-border pb-10 pt-12 sm:pb-14 sm:pt-16">
           <div className="font-mono text-xs uppercase text-cyan">Chapter {chapter.number}</div>
           <h1 className="text-balance mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">{title}</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">{chapter.description}</p>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">{description}</p>
           <div className="mt-7 flex items-center gap-2 font-mono text-xs text-muted-foreground">
-            <Clock3 className="size-3.5 text-primary" aria-hidden="true" /> 14 min read
+            <Clock3 className="size-3.5 text-primary" aria-hidden="true" /> {isChapterOne ? "24" : "14"} min read
             <span aria-hidden="true">·</span> Foundations
           </div>
         </header>
@@ -292,85 +295,132 @@ export function ChapterReader({
           </aside>
 
           <article className="min-w-0 max-w-[45rem]">
-            <ReadingSection id="overview" title="Chapter overview">
+            <ReadingSection id="overview" title="Chapter Overview & Learning Objectives">
               <p>
-                Grok is most useful when you stop treating it as a box that returns answers and start treating it as a reasoning engine inside a controlled system. A production agent combines a model, a clear goal, relevant context, and a bounded set of actions.
+                Grok is xAI’s family of general-purpose models. Its current flagship, <strong className="text-foreground">Grok 4.6</strong>, is designed for demanding reasoning, coding, and agentic work: tasks that require a model to inspect context, choose an action, use external capabilities, and adapt to the result. The model is powerful, but it is only one component of a reliable agent.
               </p>
               <p>
-                This chapter develops the mental model used throughout the guide. You will see where the language model ends, where your application begins, and why the loop connecting them matters more than any single prompt.
+                The surrounding application supplies the goal, instructions, tool definitions, permissions, session state, stopping conditions, and evidence needed to verify success. Grok supplies probabilistic reasoning and generates either a response or a structured request to use one of those tools. Treating this boundary explicitly is the foundation of production-grade agent engineering.
               </p>
               <blockquote className="border-l-2 border-primary bg-primary/5 px-6 py-5 text-lg font-medium leading-8 text-foreground">
-                An agent is not just a model with tools. It is a feedback system that can observe the consequences of its own decisions.
+                An agent is a controlled feedback system: Grok reasons about the current state, your application executes bounded actions, and the resulting evidence becomes the next observation.
               </blockquote>
-            </ReadingSection>
-
-            <ReadingSection id="principles" title="Core theoretical principles">
-              <p>
-                A language model predicts useful continuations from context. It does not maintain durable state, execute actions, or verify outcomes on its own. Those capabilities come from the system around it.
-              </p>
-              <h3 className="pt-3 text-xl font-semibold text-foreground">The four layers of an agent</h3>
-              <ol className="space-y-4 pl-6 marker:font-mono marker:text-primary">
-                <li><strong className="text-foreground">Intent.</strong> A specific goal and an explicit definition of done.</li>
-                <li><strong className="text-foreground">Context.</strong> Instructions, evidence, constraints, and prior observations.</li>
-                <li><strong className="text-foreground">Action.</strong> Tools that can read data or change the external environment.</li>
-                <li><strong className="text-foreground">Evaluation.</strong> A check that determines whether to stop, retry, or escalate.</li>
-              </ol>
-              <p>
-                Keeping these layers separate makes the system easier to inspect. It also lets you change a tool or evaluation policy without rewriting the model instruction.
-              </p>
-            </ReadingSection>
-
-            <ReadingSection id="agentic-loop" title="The agentic loop">
-              <p>
-                The simplest reliable loop is <strong className="text-foreground">observe → reason → act → evaluate</strong>. Each turn adds an observation to state, asks Grok for the next bounded action, executes that action, and checks the result against the goal.
-              </p>
+              <h3 className="pt-3 text-xl font-semibold text-foreground">By the end of this chapter, you will be able to</h3>
               <ul className="space-y-3 pl-6 marker:text-cyan">
-                <li><strong className="text-foreground">Observe:</strong> collect only the evidence needed for the next decision.</li>
-                <li><strong className="text-foreground">Reason:</strong> select an action using the goal, constraints, and current evidence.</li>
-                <li><strong className="text-foreground">Act:</strong> invoke one explicit capability with validated input.</li>
-                <li><strong className="text-foreground">Evaluate:</strong> verify progress with code or a rubric—not confidence alone.</li>
+                <li>Describe where Grok ends and the agent runtime begins.</li>
+                <li>Trace a task through observe, reason, decide, execute, and repeat.</li>
+                <li>Choose between server-side and client-side tool execution.</li>
+                <li>Configure reasoning effort without wasting latency or tokens.</li>
+                <li>Persist session state and enforce safe, testable stopping rules.</li>
               </ul>
+            </ReadingSection>
+
+            <ReadingSection id="principles" title="Core Theoretical Principles & Architecture">
               <p>
-                The loop must always have a stopping rule. Use a completion test, an iteration cap, a time budget, or a human approval boundary. Open-ended autonomy is usually an unbounded failure mode.
+                A model call is stateless computation over the context provided to it. Grok does not inherently remember an earlier request, hold a database connection, or know whether an attempted action succeeded. The agent runtime must reconstruct the relevant state on each turn and return tool results as new observations.
+              </p>
+              <h3 className="pt-3 text-xl font-semibold text-foreground">The six-stage agentic loop</h3>
+              <p>
+                A useful mental model is <strong className="text-foreground">Observe → Reason → Decide to use tools → Execute tools → Observe results → Repeat until done</strong>. “Reason” and “decide” belong to the model call; authorization, execution, and durable recording belong to the host application.
+              </p>
+              <CodeBlock code={loopDiagram} language="agent loop" />
+              <ol className="space-y-4 pl-6 marker:font-mono marker:text-primary">
+                <li><strong className="text-foreground">Observe.</strong> Assemble the user’s goal, relevant session state, policies, and latest results.</li>
+                <li><strong className="text-foreground">Reason.</strong> Grok interprets the evidence, identifies unknowns, and evaluates possible next steps.</li>
+                <li><strong className="text-foreground">Decide.</strong> The model returns a final answer, asks for clarification, or emits a structured tool call.</li>
+                <li><strong className="text-foreground">Execute.</strong> The runtime validates the schema and permissions before invoking the chosen capability.</li>
+                <li><strong className="text-foreground">Observe the result.</strong> Normalize the output or error and append it to session state.</li>
+                <li><strong className="text-foreground">Repeat or stop.</strong> Continue only while the goal remains incomplete and budgets permit another turn.</li>
+              </ol>
+              <h3 className="pt-3 text-xl font-semibold text-foreground">Reasoning effort is an engineering control</h3>
+              <p>
+                Reasoning effort controls how much inference work the model applies before responding. Use lower effort for routing, extraction, and well-specified transformations. Reserve higher effort for ambiguous planning, code repair, multi-step diagnosis, or decisions with costly consequences. More effort can improve difficult decisions, but it also increases latency and token use; it is not a substitute for missing context or weak tools.
               </p>
             </ReadingSection>
 
-            <ReadingSection id="implementation" title="Deep dive implementation">
+            <ReadingSection id="implementation" title="Deep Dive Implementation">
               <p>
-                Start with a small explicit state object. Keep observations append-only when possible, and make the attempt limit visible in code. The model should propose an action; your application should decide whether that action is allowed.
+                Implement the loop as orchestration code, not as a prompt that tells the model to simulate execution. Keep state explicit and preferably append-only: every tool result should retain its source, timestamp, and relationship to the call that produced it. This creates a trace you can replay, inspect, and test.
               </p>
               <CodeBlock code={agentCode} />
               <p>
-                Notice that <InlineCode>tools.execute</InlineCode> is outside the model. This is the control boundary. Validate the action schema, enforce permissions, set timeouts, and record the result before returning it to the next model turn.
+                The critical boundary sits between <InlineCode>validateToolCall</InlineCode> and <InlineCode>executeWithTimeout</InlineCode>. Grok may propose an action; only your runtime may authorize and perform it. Validate arguments against a strict schema, reject unknown tools, enforce per-user permissions, attach an idempotency key to writes, and set time and size limits.
               </p>
-              <h3 className="pt-3 text-xl font-semibold text-foreground">Prefer small, legible steps</h3>
+              <h3 className="pt-3 text-xl font-semibold text-foreground">Server-side tools versus client-side tools</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-border bg-card/70 p-5">
+                  <h4 className="font-semibold text-foreground">Server-side tools</h4>
+                  <p className="mt-2 text-sm leading-6">Run in trusted infrastructure and can safely access secrets, private data, internal APIs, queues, and databases. Use them for authoritative reads, writes, billing, or any capability requiring audit and policy enforcement.</p>
+                </div>
+                <div className="rounded-xl border border-border bg-card/70 p-5">
+                  <h4 className="font-semibold text-foreground">Client-side tools</h4>
+                  <p className="mt-2 text-sm leading-6">Run in the user’s browser or device and can interact with visible UI, selected files, local sensors, or consented user actions. Treat them as untrusted and never expose private credentials through their arguments.</p>
+                </div>
+              </div>
               <p>
-                A short loop is easier to trace than a single oversized prompt that asks for planning, execution, and verification at once. Each transition becomes observable, testable, and replaceable.
+                A hybrid flow can be appropriate: the server decides that explicit user approval is required, the client presents that approval, and the server performs the authorized write. The model should receive a concise result, not implementation secrets or raw credentials.
+              </p>
+              <h3 className="pt-3 text-xl font-semibold text-foreground">Session state is product state</h3>
+              <p>
+                Persist the task goal, compact conversation history, tool calls and results, approval decisions, iteration count, and completion status under a stable session identifier. Do not rely on the model to remember facts that are absent from the current context. Summarize old observations when the context grows, but retain the original event log for audits and recovery.
               </p>
             </ReadingSection>
 
-            <ReadingSection id="production" title="Production considerations">
+            <ReadingSection id="recipes" title="Real-World Recipes & Step-by-Step Practical Scenario">
               <p>
-                A demonstration succeeds when the happy path works once. A production agent succeeds when its behavior remains bounded across missing data, partial tool failures, ambiguous requests, and adversarial input.
+                Consider an incident-triage assistant asked to investigate elevated checkout errors. The goal is not “look at production.” It is a measurable, read-first task with narrow tools and an approval boundary before any persistent write.
               </p>
-              <ul className="space-y-3 pl-6 marker:text-primary">
-                <li>Give every tool the minimum permissions required for its task.</li>
-                <li>Log decisions, tool inputs, tool outputs, latency, and token usage.</li>
-                <li>Make retries selective and idempotent; never repeat a write blindly.</li>
-                <li>Escalate irreversible or high-impact actions to a person.</li>
-              </ul>
+              <CodeBlock code={incidentRecipe} />
+              <h3 className="pt-3 text-xl font-semibold text-foreground">Walkthrough</h3>
+              <ol className="space-y-4 pl-6 marker:font-mono marker:text-cyan">
+                <li><strong className="text-foreground">Observe the request.</strong> Store the incident ID, affected service, error window, permissions, and explicit definition of done.</li>
+                <li><strong className="text-foreground">Reason about missing evidence.</strong> With high reasoning effort, Grok recognizes that service health and recent logs are needed before forming a diagnosis.</li>
+                <li><strong className="text-foreground">Call a read-only tool.</strong> The runtime validates <InlineCode>getServiceHealth</InlineCode>, executes it server-side, and records latency and output.</li>
+                <li><strong className="text-foreground">Observe and refine.</strong> A payment dependency is degraded, so Grok requests a narrowly scoped log search rather than fetching every log.</li>
+                <li><strong className="text-foreground">Synthesize with evidence.</strong> Grok cites the health result and matching error pattern, states its confidence, and proposes a reversible mitigation.</li>
+                <li><strong className="text-foreground">Request approval for the write.</strong> A person reviews the proposed incident note before the server commits it.</li>
+                <li><strong className="text-foreground">Stop deliberately.</strong> The loop marks the session complete once the diagnosis, evidence, and safe next action are present.</li>
+              </ol>
               <blockquote className="border-l-2 border-cyan bg-cyan/5 px-6 py-5 text-foreground">
-                Reliability comes from constraints and feedback—not from asking the model to be more careful.
+                The useful unit of autonomy is not “access to production.” It is one bounded decision followed by one observable result.
               </blockquote>
             </ReadingSection>
 
-            <ReadingSection id="takeaways" title="Key takeaways">
-              <p>Carry these principles into every system you build:</p>
-              <ul className="space-y-3 pl-6 marker:text-cyan">
-                <li>Grok supplies reasoning; your application supplies state, tools, and control.</li>
-                <li>The agentic loop turns a model response into a sequence of verifiable decisions.</li>
-                <li>Every loop needs bounded actions, observable state, and a clear stopping condition.</li>
+            <ReadingSection id="optimization" title="Advanced Edge Cases, Troubleshooting & Optimization">
+              <p>
+                Most production failures happen around the model rather than inside a single answer. Design the runtime to recognize failure classes and respond with a specific policy instead of a universal retry.
+              </p>
+              <ul className="space-y-4 pl-6 marker:text-primary">
+                <li><strong className="text-foreground">The loop repeats without progress.</strong> Track a digest of recent calls and observations. Stop or re-plan when the same call repeats without new evidence; always enforce iteration and wall-clock budgets.</li>
+                <li><strong className="text-foreground">A tool call is malformed.</strong> Return a compact validation error once so Grok can repair the arguments. Repeated schema failures should terminate or escalate, not recurse indefinitely.</li>
+                <li><strong className="text-foreground">A write times out.</strong> Never assume it failed. Query by idempotency key before retrying, because the remote system may have completed the operation after your timeout.</li>
+                <li><strong className="text-foreground">Session state becomes stale.</strong> Version records and reject writes based on an old version. Reload authoritative state before the next reasoning turn.</li>
+                <li><strong className="text-foreground">Tool output is too large.</strong> Filter at the source, paginate, or summarize deterministically. Do not spend context tokens transporting data the model cannot act upon.</li>
+                <li><strong className="text-foreground">Latency or cost climbs.</strong> Use low effort for routine turns, cache stable reads, run independent read-only calls in parallel, and reserve the flagship model for decisions that need it.</li>
               </ul>
+              <h3 className="pt-3 text-xl font-semibold text-foreground">Treat tool output as untrusted input</h3>
+              <p>
+                Web pages, documents, logs, and third-party APIs may contain instructions that conflict with the user’s goal. Delimit tool results as data, preserve higher-priority policy separately, and never let retrieved text expand permissions or select an undeclared tool. Sanitize content before displaying it and redact secrets before adding it to model context.
+              </p>
+              <h3 className="pt-3 text-xl font-semibold text-foreground">Observe the loop, not only the final answer</h3>
+              <p>
+                Record each model turn, tool name, validated arguments, outcome category, duration, token use, and stop reason. Evaluate task completion, tool-selection accuracy, unnecessary call rate, and recovery behavior. A polished final response can hide an unsafe or wasteful trajectory.
+              </p>
+            </ReadingSection>
+
+            <ReadingSection id="summary" title="Chapter Summary & Next Steps">
+              <p>Carry these principles into every agent you build:</p>
+              <ul className="space-y-3 pl-6 marker:text-cyan">
+                <li>Grok 4.6 provides strong reasoning and coding capability; the application provides authority, memory, execution, and verification.</li>
+                <li>The agentic loop converts an open-ended task into a sequence of bounded decisions and observable outcomes.</li>
+                <li>Tool calls are proposals until trusted code validates, authorizes, and executes them.</li>
+                <li>Server-side tools protect secrets and authoritative operations; client-side tools support local, visible, consent-driven interactions.</li>
+                <li>Reasoning effort, context size, permissions, and iteration limits are explicit engineering controls.</li>
+                <li>Durable session state and complete traces make recovery, evaluation, and improvement possible.</li>
+              </ul>
+              <p>
+                In Chapter 2, you will go beneath the orchestration layer and examine how language models transform tokens and context into useful predictions—giving you a stronger basis for deciding what belongs in a prompt, a tool, or deterministic code.
+              </p>
             </ReadingSection>
 
             <nav aria-label="Chapter navigation" className="mt-20 grid gap-3 border-t border-border pt-8 sm:grid-cols-2">
@@ -381,7 +431,14 @@ export function ChapterReader({
                     <span><span className="block text-xs text-muted-foreground">Previous chapter</span>{previous.title}</span>
                   </Link>
                 </Button>
-              ) : <div />}
+              ) : (
+                <Button asChild variant="outline" className="h-auto justify-start whitespace-normal px-5 py-4 text-left">
+                  <Link to="/course">
+                    <ArrowLeft />
+                    <span><span className="block text-xs text-muted-foreground">Previous</span>Course overview</span>
+                  </Link>
+                </Button>
+              )}
               {next && (
                 <Button asChild variant="outline" className="h-auto justify-end whitespace-normal px-5 py-4 text-right">
                   <Link to="/chapters/$id" params={{ id: String(next.id) }}>

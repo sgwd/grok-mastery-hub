@@ -6,3 +6,4 @@
 - [x] Prepare Course, Chapters, chapter detail, and Resources routes
 - [x] Add page-specific metadata and verify desktop/mobile rendering
 - [x] Build and verify the reusable long-form chapter reading template
+- [x] Replace Chapter 1 placeholder material with complete technical content
