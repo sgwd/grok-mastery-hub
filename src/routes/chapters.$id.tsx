@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, BookX } from "lucide-react";
 import { ChapterReader } from "@/components/site/chapter-reader";
 import { courseParts } from "@/components/site/course-data";
+import { getChapterContent } from "@/content/chapters";
 import { Button } from "@/components/ui/button";
 
 const chapters = courseParts.flatMap((part) => part.chapters);
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/chapters/$id")({
   head: ({ params }) => {
     const chapter = chapters.find((item) => String(item.id) === params.id);
     const title = chapter
-      ? `Chapter ${chapter.number}: ${chapter.id === 1 ? "What Grok Is and How the Agentic Loop Works" : chapter.title} — Grok Mastery`
+      ? `Chapter ${chapter.number}: ${chapter.title} — Grok Mastery`
       : "Chapter unavailable — Grok Mastery";
     const description = chapter?.description ?? "This Grok Mastery chapter is unavailable.";
 
@@ -31,8 +32,9 @@ function ChapterPage() {
   const { id } = Route.useParams();
   const chapterIndex = chapters.findIndex((item) => String(item.id) === id);
   const chapter = chapters[chapterIndex];
+  const content = getChapterContent(id);
 
-  if (!chapter) {
+  if (!chapter || !content) {
     return (
       <main className="px-5 py-28 sm:px-8 sm:py-36">
         <div className="mx-auto max-w-lg text-center">
@@ -51,7 +53,9 @@ function ChapterPage() {
 
   return (
     <ChapterReader
+      key={chapter.id}
       chapter={chapter}
+      content={content}
       {...(chapters[chapterIndex - 1] ? { previous: chapters[chapterIndex - 1] } : {})}
       {...(chapters[chapterIndex + 1] ? { next: chapters[chapterIndex + 1] } : {})}
     />
