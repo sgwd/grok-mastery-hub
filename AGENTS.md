@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Chapter content lives in src/content/ (one file per part, typed blocks); course TOC derives from it — single source of truth.
