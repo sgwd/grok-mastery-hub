@@ -149,8 +149,8 @@ export function ChapterReader({
 }: {
   chapter: Chapter;
   content: ChapterContent;
-  previous?: Chapter;
-  next?: Chapter;
+  previous?: Chapter | undefined;
+  next?: Chapter | undefined;
 }) {
   const reduceMotion = useReducedMotion();
   const sections = useMemo<Section[]>(

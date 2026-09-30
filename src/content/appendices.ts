@@ -290,9 +290,9 @@ Output reserve       10–15%`
         "Key Files",
         ul(
           "**AGENTS.md** — Top-level instructions, coding standards, and safety rules visible to every agent.",
-          **`.grok/skills/`** — Version-controlled, discoverable skills.",
-          **`.grok/context/`** — Living project memory that agents should load when relevant.",
-          **`.env` / secret manager** — API keys and credentials (never committed)."
+          "**`.grok/skills/`** — Version-controlled, discoverable skills.",
+          "**`.grok/context/`** — Living project memory that agents should load when relevant.",
+          "**`.env` / secret manager** — API keys and credentials (never committed)."
         )
       ),
       section(
