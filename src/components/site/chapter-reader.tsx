@@ -39,6 +39,8 @@ function Block({ block }: { block: ContentBlock }) {
       return <blockquote className="border-l-2 border-primary bg-primary/5 px-6 py-5 text-lg font-medium leading-8 text-foreground">{renderInline(block.text)}</blockquote>;
     case "code":
       return <CodeBlock code={block.code} language={block.language} />;
+    case "loop":
+      return <LoopDiagram />;
   }
 }
 

@@ -28,7 +28,7 @@ export const part1Chapters: ChapterContent[] = [
         "Core Theoretical Principles & Architecture",
         p("Grok is stateless between API calls. It only knows what you put in the current context. Therefore every useful agent must reconstruct relevant state on each turn and feed tool results back as new observations."),
         h3("The Agentic Loop"),
-        code("text", loopDiagram),
+        loop(),
         ol(
           "**Observe** — Assemble the goal, system instructions, relevant memory, recent tool results, and constraints.",
           "**Reason** — Grok evaluates the current evidence and decides what to do next.",
