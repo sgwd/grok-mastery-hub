@@ -1,228 +1,312 @@
-import { PART_3, code, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
+import { PART_3, code, h3, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
 
 export const part3Chapters: ChapterContent[] = [
+  // ==================== CHAPTER 14 ====================
   {
     id: 14,
     slug: "custom-prompt-templates-skills-workflows",
     part: PART_3,
     title: "Building Custom Prompt Templates, Skills, and Tailored Workflows",
-    subtitle: "Package expertise into reusable templates and skills that make Grok behave like a specialist on demand.",
+    subtitle: "Turn successful prompts into reusable, versioned skills that your whole team (and your agents) can invoke.",
     sections: [
       section(
-        "Overview",
-        p("A skill is a reusable bundle: instructions, examples, tools, and output format for a specific job. Skills turn scattered prompts into dependable capabilities."),
+        "Chapter Overview & Learning Objectives",
+        p("One-off prompts do not scale. High-performing teams convert proven prompts into named skills with clear descriptions, parameters, recommended settings, and output contracts."),
+        ul(
+          "Design reusable prompt templates with clean parameters.",
+          "Package templates into discoverable skills.",
+          "Organize skills so both humans and agents can find the right one.",
+          "Version and improve skills over time.",
+          "Compose skills into larger workflows."
+        )
       ),
       section(
-        "Anatomy of a Skill",
-        ul("**Trigger:** when the skill applies.", "**Instructions:** the procedure and quality bar.", "**Examples:** representative inputs and ideal outputs.", "**Tools:** the capabilities it may use.", "**Output contract:** the exact format returned."),
-        code("markdown", `# Skill: Release Notes
-Use when: a list of merged PRs is provided.
-Steps:
-1. Group changes by feature, fix, and internal.
-2. Write user-facing language, no ticket IDs.
-Output: Markdown with three headed sections.`),
+        "From Prompt to Skill",
+        p("A good skill usually contains:"),
+        ul(
+          "A clear name and short description (when it should be used).",
+          "The full instruction template with placeholders.",
+          "Recommended model and reasoning_effort.",
+          "Expected input and output format (ideally a schema).",
+          "A few examples of good inputs and outputs.",
+          "Any required tools."
+        ),
+        code(
+          "markdown",
+          `# Skill: code-review
+
+Description: Perform a thorough, structured code review of a diff or set of files.
+
+When to use: When a pull request is opened or a developer asks for a review.
+
+Recommended settings: model=grok-4.6, reasoning_effort=high
+
+Output: JSON following the review schema.`
+        )
       ),
       section(
-        "Templating Techniques",
-        ul("Use named variables and validate them before rendering.", "Compose small templates rather than one mega-prompt.", "Keep examples in separate files for easy updates."),
+        "Skill Discovery & Organization",
+        ul(
+          "Keep skills in a version-controlled directory (e.g. \`.grok/skills/\`).",
+          "Use consistent naming and a clear description so agents can select them automatically.",
+          "Group related skills (review, research, release, incident, etc.).",
+          "Document required permissions and side-effects."
+        )
       ),
       section(
-        "Tailored Workflows",
-        p("Chain skills into workflows: research → outline → draft → review. Each step has its own skill and a checkpoint between them."),
+        "Composition & Workflows",
+        p("Skills become most powerful when composed. A typical feature workflow might chain:"),
+        ol(
+          "plan-feature",
+          "research-adjacent-code",
+          "implement-from-spec",
+          "write-tests",
+          "code-review",
+          "pr-description"
+        ),
+        p("An orchestrator (or a human) can invoke these skills in sequence, feeding the output of one into the next.")
       ),
       section(
-        "Key Takeaways",
-        ul("Skills package procedure plus examples plus contract.", "Compose small templates.", "Workflows chain skills with checkpoints."),
+        "Chapter Summary & Next Steps",
+        ul(
+          "Treat prompts as product assets, not disposable chat messages.",
+          "Give every skill a clear purpose, interface, and ownership.",
+          "Make skills discoverable by both humans and agents.",
+          "Compose simple skills into reliable workflows."
+        ),
+        p("Next → Chapter 15: Multi-Agent Architecture – Spawning, Managing, and Coordinating Agents.")
       ),
     ],
   },
+
+  // ==================== CHAPTER 15 ====================
   {
     id: 15,
     slug: "multi-agent-architecture",
     part: PART_3,
     title: "Multi-Agent Architecture: Spawning, Managing, and Coordinating Agents",
-    subtitle: "Split complex work across specialized agents with clear contracts, shared state, and reliable coordination.",
+    subtitle: "Design systems in which multiple specialized Grok agents collaborate on complex work.",
     sections: [
       section(
-        "Overview",
-        p("One agent with many tools becomes confused. Several focused agents, each with a narrow role and toolset, are easier to test and reason about."),
-      ),
-      section(
-        "Core Topologies",
+        "Chapter Overview & Learning Objectives",
+        p("Some tasks are too broad, too adversarial, or too parallel for a single agent. Multi-agent architectures let you specialize roles, run work in parallel, and introduce deliberate critique."),
         ul(
-          "**Orchestrator–worker:** a planner delegates subtasks and merges results.",
-          "**Pipeline:** agents hand off work in fixed stages.",
-          "**Critic loop:** a generator produces and a reviewer evaluates.",
-          "**Parallel fan-out:** independent subtasks run concurrently.",
+          "Choose appropriate multi-agent topologies.",
+          "Define clear contracts between agents.",
+          "Manage shared state and prevent interference.",
+          "Control cost and complexity when multiple agents run.",
+          "Know when a single well-designed agent is actually better."
+        )
+      ),
+      section(
+        "Common Topologies",
+        ul(
+          "**Supervisor–Worker** — One coordinator decomposes work and delegates to specialists (most common and recommended starting point).",
+          "**Pipeline** — Agents run in a fixed sequence (research → plan → implement → review).",
+          "**Parallel Swarm** — Multiple agents explore different approaches simultaneously; results are later aggregated.",
+          "**Critique / Debate** — One agent proposes, another deliberately criticizes, a third synthesizes.",
+          "**Hierarchical** — Supervisors of supervisors for very large programs of work."
+        )
+      ),
+      section(
+        "Design Rules for Multi-Agent Systems",
+        ul(
+          "Give every agent a single clear responsibility.",
+          "Use structured (preferably JSON) hand-offs between agents.",
+          "Keep memory scoped — do not let every agent see every other agent’s private scratchpad.",
+          "Enforce per-agent and global budgets.",
+          "Make the supervisor responsible for final integration and quality."
         ),
+        quote("More agents do not automatically produce better results. Coordination overhead is real.")
       ),
       section(
-        "Spawning and Managing Agents",
-        code("typescript", `const results = await Promise.all(
-  subtasks.map((task) =>
-    spawnAgent({
-      role: "researcher",
-      goal: task.goal,
-      tools: [webSearch, readFile],
-      budget: { maxIterations: 8, maxUsd: 0.2 },
-    }),
-  ),
-)
-return orchestrator.merge(results)`),
-        ul("Give every agent its own budget and timeout.", "Pass structured inputs and require structured outputs.", "Track parent–child relationships for tracing."),
+        "When to Stay Single-Agent",
+        p("A single well-instrumented agent with good memory, tools, and prompting is often faster, cheaper, and easier to debug. Only move to multi-agent designs when you have evidence that specialization or parallelism is required.")
       ),
       section(
-        "Coordination Challenges",
-        ul("Conflicting outputs: define a merge policy or tiebreaker.", "Duplicate work: assign disjoint scopes.", "Context bloat: send summaries, not full transcripts, between agents."),
-        quote("Add an agent only when you can describe its contract in one sentence."),
-      ),
-      section(
-        "Key Takeaways",
-        ul("Specialize agents by role and tools.", "Contracts and budgets keep coordination sane.", "Trace the whole tree, not just the final answer."),
+        "Chapter Summary & Next Steps",
+        ul(
+          "Start with supervisor–worker before more exotic topologies.",
+          "Contracts, budgets, and scoped memory are essential.",
+          "Measure against a strong single-agent baseline.",
+          "Complexity must pay for itself in quality or speed."
+        ),
+        p("Next → Chapter 16: Event Hooks, Triggers, and Automated Pipelines.")
       ),
     ],
   },
+
+  // ==================== CHAPTER 16 ====================
   {
     id: 16,
     slug: "event-hooks-triggers-pipelines",
     part: PART_3,
     title: "Event Hooks, Triggers, and Automated Pipelines",
-    subtitle: "Run Grok automatically in response to events — commits, messages, schedules, and webhooks.",
+    subtitle: "Move from interactive agents to systems that react to real-world events and run without constant human initiation.",
     sections: [
       section(
-        "Overview",
-        p("The most valuable agents run without being asked. Event-driven design connects Grok to the moments where work begins."),
+        "Chapter Overview & Learning Objectives",
+        p("Interactive agents wait for a human. Event-driven agents react to signals — pull requests, failed deploys, support tickets, scheduled times, metric alerts — and act within defined policy."),
+        ul(
+          "Design secure webhook and event ingestion.",
+          "Build reliable automated pipelines that include Grok agents.",
+          "Enforce idempotency, budgets, and human escalation.",
+          "Integrate with existing CI, issue trackers, and monitoring systems.",
+          "Keep automated agents observable and safe."
+        )
       ),
       section(
-        "Trigger Types",
-        ul("**Webhooks:** new issue, PR, payment, or form submission.", "**Schedules:** nightly reports, weekly audits.", "**Lifecycle hooks:** before or after a tool call or session.", "**Data changes:** new rows or files in storage."),
+        "Core Trigger Types",
+        ul(
+          "**Webhooks** — GitHub, GitLab, Stripe, monitoring systems, etc.",
+          "**Schedules** — Cron-style nightly or hourly jobs.",
+          "**Queues / Streams** — Internal event buses and work queues.",
+          "**Lifecycle hooks** — Grok Build or application lifecycle events."
+        )
       ),
       section(
-        "Building a Pipeline",
-        code("typescript", `on("issue.opened", async (event) => {
-  if (!verifySignature(event)) return
-  const triage = await grok.classify(event.issue, labelsSchema)
-  await github.addLabels(event.issue.id, triage.labels)
-  if (triage.severity === "high") await pageOnCall(event.issue)
-})`),
-        ol("Verify the event source.", "Enqueue work instead of processing inline.", "Make handlers idempotent.", "Record outcomes for review."),
+        "Pipeline Design Principles",
+        ol(
+          "Validate and authenticate every incoming event.",
+          "Make processing idempotent (use delivery IDs or content hashes).",
+          "Give every run a unique execution ID and a hard budget.",
+          "Separate observation, diagnosis, action, and verification stages.",
+          "Escalate to humans when confidence is low or risk is high.",
+          "Emit structured telemetry for every stage."
+        )
       ),
       section(
-        "Reliability",
-        ul("Use queues with retries and dead-letter handling.", "Deduplicate by event ID.", "Rate-limit to protect downstream systems and budgets."),
+        "Safety Invariants for Autonomous Runs",
+        ul(
+          "No unrestricted write access by default.",
+          "High-risk actions require explicit allow-listing or human approval.",
+          "Budgets on tokens, tool calls, wall time, and money.",
+          "Dead-letter queues and alerting for failures.",
+          "Full audit trail of what the agent saw and did."
+        )
       ),
       section(
-        "Key Takeaways",
-        ul("Events turn assistants into automation.", "Verify, enqueue, and stay idempotent.", "Observe every run."),
+        "Chapter Summary & Next Steps",
+        ul(
+          "Event-driven agents need stronger safety and observability than interactive ones.",
+          "Idempotency and budgets are non-negotiable.",
+          "Start with narrow, low-risk automations and expand only after evidence of reliability.",
+          "Always keep a clear path for human intervention."
+        ),
+        p("Next → Chapter 17: Tool & Function Calling Deep Dive.")
       ),
     ],
   },
+
+  // ==================== CHAPTER 17 ====================
   {
     id: 17,
     slug: "tool-function-calling-deep-dive",
     part: PART_3,
     title: "Tool & Function Calling Deep Dive",
-    subtitle: "Advanced tool design: schemas, parallel calls, error handling, and making tools that models use correctly.",
+    subtitle: "Master the full tool-calling surface — built-in tools, custom functions, parallel calls, MCP, and production patterns.",
     sections: [
       section(
-        "Overview",
-        p("Tool quality largely determines agent quality. This deep dive covers schema design, parallel calls, error contracts, and testing."),
+        "Chapter Overview & Learning Objectives",
+        p("This chapter goes deeper into the practical engineering of tool use: how to mix server-side and client-side tools, control parallelism, handle errors, integrate MCP, and keep large tool ecosystems maintainable."),
+        ul(
+          "Correctly combine built-in server-side tools with custom functions.",
+          "Control parallel versus sequential tool execution.",
+          "Design robust error handling and recovery.",
+          "Integrate Model Context Protocol (MCP) servers.",
+          "Keep tool results from exploding the context window."
+        )
       ),
       section(
-        "Schema Design Principles",
-        ul("Use enums instead of free text wherever possible.", "Describe each parameter with examples.", "Make required fields truly required.", "Return compact, structured results with only what the model needs."),
+        "Server-side vs Client-side vs MCP",
+        ul(
+          "**Server-side built-in tools** (web_search, x_search, code_execution, collections_search, etc.) — Executed by xAI, convenient and isolated.",
+          "**Custom client-side functions** — Executed in your infrastructure, full control, necessary for private systems.",
+          "**MCP** — Standardized way to expose external tool servers so many agents can share the same capabilities."
+        )
       ),
       section(
-        "Parallel and Sequential Calls",
-        p("Grok can request several independent calls in one turn. Execute them concurrently, then return every result together, matched by call ID."),
-        code("typescript", `const outputs = await Promise.all(
-  response.tool_calls.map(async (call) => ({
-    tool_call_id: call.id,
-    role: "tool",
-    content: JSON.stringify(await run(call)),
-  })),
-)`),
+        "Parallelism & Ordering",
+        p("By default models may emit multiple tool calls in parallel. This is excellent for independent lookups and harmful when ordering or dependencies matter."),
+        ul(
+          "Use parallel calls for independent research or data fetching.",
+          "Force sequential execution when one result is required before the next call.",
+          "Encode ordering requirements in the prompt and tool descriptions when needed."
+        )
       ),
       section(
-        "Error Contracts",
-        code("json", `{ "ok": false, "error": "NOT_FOUND", "hint": "Check invoice_id format: inv_XXXX" }`),
-        ul("Return actionable errors the model can recover from.", "Distinguish retryable from fatal errors.", "Never leak stack traces or secrets."),
+        "Result Management",
+        ul(
+          "Truncate or summarize large tool outputs before feeding them back.",
+          "Keep references (URLs, file IDs, query IDs) so the full data can be retrieved again if necessary.",
+          "Normalize errors into a consistent structure the model can understand."
+        )
       ),
       section(
-        "Key Takeaways",
-        ul("Precise schemas prevent bad calls.", "Parallelize independent calls.", "Errors are feedback — make them useful."),
+        "Chapter Summary & Next Steps",
+        ul(
+          "Choose the execution location (server, client, MCP) deliberately.",
+          "Control parallelism explicitly when order matters.",
+          "Treat tool results as potentially large and untrusted.",
+          "Standardize error shapes and logging across all tools."
+        ),
+        p("Next → Chapter 18: Developing Custom Skills, Output Styles, Structured Outputs, and Response Formats.")
       ),
     ],
   },
+
+  // ==================== CHAPTER 18 ====================
   {
     id: 18,
-    slug: "custom-skills-structured-outputs",
+    slug: "structured-outputs-skills-styles",
     part: PART_3,
     title: "Developing Custom Skills, Output Styles, Structured Outputs, and Response Formats",
-    subtitle: "Make Grok’s responses machine-readable and on-brand with schemas, output styles, and validation.",
+    subtitle: "Make agent outputs reliable, machine-readable, and consistent in style.",
     sections: [
       section(
-        "Overview",
-        p("Production systems consume model output programmatically. Structured outputs and consistent styles make that safe."),
+        "Chapter Overview & Learning Objectives",
+        p("Free-form text is ideal for humans but brittle for automation. Structured outputs and deliberate style control turn Grok into a dependable component of larger systems."),
+        ul(
+          "Enforce JSON Schema or equivalent structured output.",
+          "Design consistent output styles for different audiences.",
+          "Combine structured final answers with tool calling.",
+          "Handle validation failures and repair loops gracefully.",
+          "Version output contracts as they evolve."
+        )
       ),
       section(
-        "Structured Outputs",
-        code("typescript", `const Review = z.object({
-  verdict: z.enum(["approve", "request_changes"]),
-  findings: z.array(z.object({
-    severity: z.enum(["low", "medium", "high"]),
-    file: z.string(),
-    message: z.string(),
-  })),
-})
-
-const result = await grok.parse({ schema: Review, messages })`),
-        p("Always validate parsed output, even when using schema-constrained generation."),
+        "Structured Output Strategies",
+        ul(
+          "**Strict JSON Schema** — Highest reliability when the platform supports it.",
+          "**Tool-argument schemas** — Force structure on any tool call.",
+          "**Prompt-level instructions + validation** — Useful fallback when schema enforcement is limited.",
+          "**Post-processing repair** — Ask the model to fix invalid output, or apply deterministic repair where possible."
+        )
       ),
       section(
-        "Output Styles",
-        ul("Define a style guide: tone, length, formatting.", "Provide one ideal example per style.", "Name styles (e.g. `concise-technical`, `executive-summary`) and select them per request."),
+        "Output Style as a First-Class Concern",
+        p("Style includes tone, verbosity, use of Markdown, presence of explanations, and formatting conventions. Keep style instructions stable and in the system prompt or skill definition so they remain consistent across sessions.")
       ),
       section(
-        "Validation and Repair",
-        ol("Parse and validate.", "On failure, send the error back once for repair.", "If repair fails, fall back or escalate."),
+        "Practical Pattern",
+        code(
+          "text",
+          `System: You are a code review assistant.
+Always respond with valid JSON matching the schema.
+Do not wrap the JSON in markdown fences.
+Be precise and professional; keep findings concise.`
+        ),
+        p("Then validate the response against the schema. On failure, either repair or escalate.")
       ),
       section(
-        "Key Takeaways",
-        ul("Schemas turn text into contracts.", "Validate everything.", "Named styles keep tone consistent."),
-      ),
-    ],
-  },
-  {
-    id: 19,
-    slug: "ecosystem-integrations-workspace",
-    part: PART_3,
-    title: "Ecosystem Integrations and Workspace Customization",
-    subtitle: "Connect Grok to the tools your team already uses and tailor the workspace to your workflows.",
-    sections: [
-      section(
-        "Overview",
-        p("Grok delivers the most value where work already happens: chat, docs, issue trackers, and code hosts."),
-      ),
-      section(
-        "Common Integrations",
-        ul("**Chat:** Slack or Discord bots for Q&A and triage.", "**Docs:** knowledge bases for retrieval.", "**Issue trackers:** summarize, label, and route tickets.", "**Code hosts:** PR review and repository Q&A.", "**Protocol servers (MCP):** standardized tool access across apps."),
-      ),
-      section(
-        "Integration Architecture",
-        code("text", `External app ──webhook──▶ Your backend ──▶ Grok
-      ▲                       │
-      └────── API write ◀─────┘ (validated, scoped)`),
-        ul("Use OAuth with minimal scopes.", "Keep tokens server-side.", "Map external identities to internal permissions."),
-      ),
-      section(
-        "Workspace Customization",
-        ul("Shared prompt libraries and skills.", "Team-level project memory.", "Default models and budgets per workspace."),
-        quote("Integrate where the work is, not where the demo is."),
-      ),
-      section(
-        "Key Takeaways",
-        ul("Meet users in existing tools.", "Scope OAuth tightly.", "Share skills and memory across the team."),
+        "Chapter Summary & Next Steps",
+        ul(
+          "Prefer schema-enforced structured output whenever downstream code depends on the result.",
+          "Keep style instructions stable and explicit.",
+          "Validate early and design repair or fallback paths.",
+          "Version your output contracts."
+        ),
+        p("Next → Chapter 19: Ecosystem Integrations and Workspace Customization.")
       ),
     ],
   },
