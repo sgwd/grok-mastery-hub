@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
+  ArrowDown,
   ArrowLeft,
   ArrowRight,
   Check,
@@ -8,6 +9,7 @@ import {
   Clipboard,
   Clock3,
   ListTree,
+  Repeat2,
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,8 @@ function Block({ block }: { block: ContentBlock }) {
       return <blockquote className="border-l-2 border-primary bg-primary/5 px-6 py-5 text-lg font-medium leading-8 text-foreground">{renderInline(block.text)}</blockquote>;
     case "code":
       return <CodeBlock code={block.code} language={block.language} />;
+    case "loop":
+      return <LoopDiagram />;
   }
 }
 
@@ -82,6 +86,55 @@ function Contents({ sections, active, onNavigate }: { sections: Section[]; activ
         </a>
       ))}
     </nav>
+  );
+}
+
+const LOOP_STEPS = [
+  { n: "1", title: "OBSERVE", desc: "Goal + session state + latest tool results" },
+  { n: "2", title: "REASON", desc: "Grok evaluates evidence and progress" },
+  { n: "3", title: "DECIDE", desc: "Answer, clarify, or call a tool" },
+  { n: "4", title: "EXECUTE", desc: "Host validates, authorizes, runs, records" },
+  { n: "5", title: "OBSERVE RESULT", desc: "Append output or error to state" },
+];
+
+function LoopDiagram() {
+  return (
+    <figure className="my-10 rounded-2xl border border-border bg-card/75 p-6 backdrop-blur-xl sm:p-10">
+      <div className="mx-auto flex max-w-md flex-col items-center">
+        {LOOP_STEPS.map((step, i) => (
+          <Fragment key={step.n}>
+            {i > 0 && <ArrowDown className="my-2 size-4 text-primary" aria-hidden="true" />}
+            <div className="flex w-full items-center gap-4 rounded-xl border border-border bg-surface-elevated/60 px-5 py-4 transition-colors hover:border-primary/50">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 font-mono text-sm font-semibold text-primary">
+                {step.n}
+              </span>
+              <div className="min-w-0">
+                <div className="font-mono text-sm font-semibold tracking-wide text-foreground">{step.title}</div>
+                <div className="mt-0.5 text-sm leading-5 text-muted-foreground">{step.desc}</div>
+              </div>
+            </div>
+          </Fragment>
+        ))}
+
+        <ArrowDown className="my-2 size-4 text-primary" aria-hidden="true" />
+
+        <div className="flex w-full items-center justify-center gap-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-5 py-3 font-mono text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">Done?</span>
+          <span aria-hidden="true">—</span>
+          <span className="text-cyan">yes</span>
+          <ArrowRight className="size-3.5 text-cyan" aria-hidden="true" />
+          <span className="text-foreground">Final response</span>
+        </div>
+
+        <div className="mt-3 flex items-center gap-2 font-mono text-xs text-muted-foreground">
+          <Repeat2 className="size-3.5 text-cyan" aria-hidden="true" />
+          <span><span className="text-cyan">no</span> — repeat from <span className="text-foreground">REASON</span></span>
+        </div>
+      </div>
+      <figcaption className="mt-6 text-center font-mono text-[0.6875rem] uppercase text-muted-foreground">
+        The agentic loop
+      </figcaption>
+    </figure>
   );
 }
 

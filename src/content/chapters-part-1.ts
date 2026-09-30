@@ -1,28 +1,4 @@
-import { PART_1, code, h3, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
-
-const loopDiagram = `┌─────────────────────────────────────────────────────────┐
-│  1. OBSERVE   Goal + session state + latest tool results│
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────────────┐
-│  2. REASON    Grok evaluates evidence and progress      │
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────────────┐
-│  3. DECIDE    Answer, clarify, or call a tool           │
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────────────┐
-│  4. EXECUTE   Host validates, authorizes, runs, records │
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────────────┐
-│  5. OBSERVE RESULT   Append output or error to state    │
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-              Done? ── yes ──→ Final response
-                │ no
-                └────────────→ Repeat from REASON`;
+import { PART_1, code, h3, loop, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
 
 export const part1Chapters: ChapterContent[] = [
   // ==================== CHAPTER 1 ====================
@@ -52,7 +28,7 @@ export const part1Chapters: ChapterContent[] = [
         "Core Theoretical Principles & Architecture",
         p("Grok is stateless between API calls. It only knows what you put in the current context. Therefore every useful agent must reconstruct relevant state on each turn and feed tool results back as new observations."),
         h3("The Agentic Loop"),
-        code("text", loopDiagram),
+        loop(),
         ol(
           "**Observe** — Assemble the goal, system instructions, relevant memory, recent tool results, and constraints.",
           "**Reason** — Grok evaluates the current evidence and decides what to do next.",

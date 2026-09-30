@@ -4,7 +4,8 @@ export type ContentBlock =
   | { type: "ul"; items: string[] }
   | { type: "ol"; items: string[] }
   | { type: "code"; language: string; code: string }
-  | { type: "quote"; text: string };
+  | { type: "quote"; text: string }
+  | { type: "loop" };
 
 export type ChapterSection = {
   heading: string;
@@ -27,6 +28,7 @@ export const ul = (...items: string[]): ContentBlock => ({ type: "ul", items });
 export const ol = (...items: string[]): ContentBlock => ({ type: "ol", items });
 export const quote = (text: string): ContentBlock => ({ type: "quote", text });
 export const code = (language: string, source: string): ContentBlock => ({ type: "code", language, code: source });
+export const loop = (): ContentBlock => ({ type: "loop" });
 export const section = (heading: string, ...content: ContentBlock[]): ChapterSection => ({ heading, content });
 
 export const PART_1 = "Part 1: Foundations";
