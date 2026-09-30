@@ -4,6 +4,8 @@ import { part2Chapters } from "./chapters-part-2";
 import { part3Chapters } from "./chapters-part-3";
 import { part4Chapters } from "./chapters-part-4";
 import { part5Chapters } from "./chapters-part-5";
+import { part6Chapters } from "./chapters-part-6";
+import { appendices } from "./appendices";
 
 export type { ChapterContent, ChapterSection, ContentBlock } from "./chapter-types";
 
@@ -14,6 +16,8 @@ export const allChapters: ChapterContent[] = [
   ...part3Chapters,
   ...part4Chapters,
   ...part5Chapters,
+  ...part6Chapters,
+  ...appendices,
 ];
 
 export function getChapterContent(id: number | string) {
@@ -21,5 +25,9 @@ export function getChapterContent(id: number | string) {
 }
 
 export function slugifyHeading(heading: string) {
-  return heading.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return heading
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
