@@ -465,4 +465,78 @@ Do not continue until I confirm.`
       ),
     ],
   },
+    // ==================== CHAPTER 13 ====================
+  {
+    id: 13,
+    slug: "autonomous-research-deep-investigation",
+    part: PART_2,
+    title: "Autonomous Research, Code Exploration, Web Search, X Search, and Deep Investigation",
+    subtitle: "Build research agents that can search the web, X, and codebases, then synthesize grounded, well-cited conclusions.",
+    sections: [
+      section(
+        "Chapter Overview & Learning Objectives",
+        p("Grok’s real-time search capabilities (web and X) combined with code exploration tools make it unusually strong at investigation. Turning that capability into reliable research agents requires structure, source discipline, and clear stopping criteria."),
+        ul(
+          "Design a complete research loop from question to cited answer.",
+          "Combine web_search, x_search, code exploration, and collections.",
+          "Evaluate source quality and handle conflicting information.",
+          "Prevent infinite search loops and uncontrolled cost.",
+          "Produce answers that clearly separate facts, inferences, and uncertainties."
+        )
+      ),
+      section(
+        "The Research Loop",
+        ol(
+          "Clarify and decompose the question into concrete sub-questions.",
+          "Generate targeted search queries (web, X, code, internal docs).",
+          "Execute searches, often in parallel when the sub-questions are independent.",
+          "Select and read the most promising sources.",
+          "Extract claims together with their sources.",
+          "Cross-check conflicting information.",
+          "Synthesize a final answer with citations and explicit confidence levels.",
+          "Stop once the question can be answered well enough — do not search forever."
+        )
+      ),
+      section(
+        "Tool Strategy",
+        ul(
+          "**web_search / browse** — Official documentation, papers, news, and general knowledge.",
+          "**x_search** — Real-time discussion, announcements, and public sentiment.",
+          "**Code exploration tools** — File search, symbol search, reading specific files, and running targeted experiments.",
+          "**collections_search** — Your own project knowledge and internal documentation."
+        ),
+        p("Give the agent clear guidance about which tool to prefer for different kinds of questions.")
+      ),
+      section(
+        "Source Quality & Citation Discipline",
+        ul(
+          "Prefer primary sources (official docs, original papers, first-party announcements).",
+          "Treat social media posts as signals that need verification, not as facts.",
+          "Always record the source of each important claim.",
+          "Note dates — especially for fast-moving topics.",
+          "When sources conflict, surface the conflict instead of arbitrarily choosing one."
+        ),
+        quote("A research answer without sources is just an opinion.")
+      ),
+      section(
+        "Cost & Control",
+        ul(
+          "Set a hard limit on the number of search turns.",
+          "Require the agent to justify why additional searches are needed.",
+          "Compact intermediate findings so the context does not explode.",
+          "Cache common research results when appropriate."
+        )
+      ),
+      section(
+        "Chapter Summary & Next Steps",
+        ul(
+          "Structure research as a disciplined loop, not open-ended browsing.",
+          "Combine multiple search tools with clear preferences.",
+          "Cite sources and surface uncertainty.",
+          "Enforce budgets so investigation remains affordable."
+        ),
+        p("This concludes Part 2. Next → Part 3 begins with Chapter 14: Building Custom Prompt Templates, Skills, and Tailored Workflows.")
+      ),
+    ],
+  },
 ];
