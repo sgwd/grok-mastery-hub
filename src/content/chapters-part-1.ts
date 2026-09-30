@@ -1,28 +1,4 @@
-import { PART_1, code, h3, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
-
-const loopDiagram = `┌─────────────────────────────────────────────────────────┐
-│  1. OBSERVE   Goal + session state + latest tool results│
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────────────┐
-│  2. REASON    Grok evaluates evidence and progress      │
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────────────┐
-│  3. DECIDE    Answer, clarify, or call a tool           │
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────────────┐
-│  4. EXECUTE   Host validates, authorizes, runs, records │
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-┌─────────────────────────────────────────────────────────┐
-│  5. OBSERVE RESULT   Append output or error to state    │
-└───────────────────────┬─────────────────────────────────┘
-                        ↓
-              Done? ── yes ──→ Final response
-                │ no
-                └────────────→ Repeat from REASON`;
+import { PART_1, code, h3, loop, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
 
 export const part1Chapters: ChapterContent[] = [
   // ==================== CHAPTER 1 ====================
