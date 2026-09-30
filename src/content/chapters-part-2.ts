@@ -1,6 +1,7 @@
 import { PART_2, code, h3, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
 
 export const part2Chapters: ChapterContent[] = [
+  // ==================== CHAPTER 7 ====================
   {
     id: 7,
     slug: "persistent-memory-project-context",
@@ -9,40 +10,94 @@ export const part2Chapters: ChapterContent[] = [
     subtitle: "Give Grok durable knowledge of your project so every session starts informed instead of from zero.",
     sections: [
       section(
-        "Overview",
-        p("Models are stateless. Memory is something your system provides. A deliberate context architecture decides what Grok knows about a project, where that knowledge lives, and how it stays current."),
-      ),
-      section(
-        "Layers of Memory",
+        "Chapter Overview & Learning Objectives",
+        p("Grok is stateless between requests. Any knowledge that must survive across conversations, sessions, or days has to be provided by your system. This chapter shows how to design a practical three-layer memory architecture that keeps agents informed without overwhelming the context window."),
+        h3("By the end of this chapter you will be able to"),
         ul(
-          "**Working memory:** the current conversation and recent tool results.",
-          "**Project memory:** conventions, architecture, and decisions stored in files like `AGENTS.md`.",
-          "**Long-term memory:** searchable records of past sessions, facts, and preferences.",
-        ),
-        quote("Memory is only useful if it is small, accurate, and loaded at the right moment."),
+          "Separate working memory, project memory, and long-term knowledge.",
+          "Design a clean project context structure (usually living in .grok/ or AGENTS.md).",
+          "Load the right memory at the right time.",
+          "Keep project memory accurate and up-to-date as the codebase evolves.",
+          "Avoid common memory-related failures (staleness, contradiction, bloat)."
+        )
       ),
       section(
-        "Designing a Project Context File",
-        code("markdown", `# Project Context
+        "Core Theoretical Principles – The Three-Layer Model",
+        ul(
+          "**Working Memory** — The current conversation, recent tool results, and immediate task state. Lives only for the session (or until compacted).",
+          "**Project / Medium-term Memory** — Architecture decisions, coding standards, important constraints, current goals, and open questions. Usually stored in version-controlled files such as AGENTS.md, .grok/context/, or a decisions log.",
+          "**Long-term Knowledge** — Documentation, past research, resolved incidents, and searchable historical information. Often stored in Collections, a vector store, or a documentation system."
+        ),
+        quote("Memory is only useful when it is small, accurate, relevant, and loaded at the right moment.")
+      ),
+      section(
+        "Designing Project Context",
+        p("Create a concise, version-controlled source of truth that every agent and every developer can read."),
+        code(
+          "markdown",
+          `# Project Context
+
 ## Stack
-TypeScript, Postgres, deployed on edge workers.
-## Conventions
-- All money values are integer cents.
-- Use zod for every external input.
-## Decisions
-- 2026-03: moved to event sourcing for orders (audit needs).`),
-        ul("Keep it under a few hundred lines.", "Record the why behind each rule.", "Replace outdated rules rather than appending contradictions."),
+- TypeScript, React, Node.js
+- PostgreSQL + Redis
+- Deployed on Fly.io
+
+## Hard Rules
+- All money values are integer cents
+- Every external input is validated with Zod
+- No direct database access from the frontend
+
+## Key Decisions
+- 2026-03-12: Moved order processing to event sourcing (audit + replay requirements)
+- 2026-05-03: Adopted Grok 4.6 as the primary coding model
+
+## Open Questions
+- Should we introduce a read replica for reporting?`
+        ),
+        ul(
+          "Keep it short (ideally under a few hundred lines).",
+          "Record the *why*, not just the *what*.",
+          "Update it as part of the Definition of Done for architectural changes.",
+          "Prefer replacing outdated rules over appending contradictory ones."
+        )
+      ),
+      section(
+        "Loading Memory into the Agent",
+        p("At the start of every significant task, explicitly inject the relevant project context into the system or first user message. For long-running agents, re-inject or refresh it periodically."),
+        code(
+          "typescript",
+          `function buildMessages(task: string, history: Message[]) {
+  const projectContext = loadProjectContext(); // reads AGENTS.md + decisions
+  return [
+    { role: "system", content: SYSTEM_PROMPT + "\\n\\n" + projectContext },
+    ...compact(history),
+    { role: "user", content: task },
+  ];
+}`
+        )
       ),
       section(
         "Keeping Memory Fresh",
-        p("Update memory at the moment a decision is made. Periodically ask Grok to audit the context file against the codebase and flag stale entries."),
+        ul(
+          "Update project memory in the same PR that changes the architecture.",
+          "Periodically ask Grok to audit the context file against the current codebase and flag stale or missing entries.",
+          "Treat memory files like code: review them, version them, and reject low-quality additions."
+        )
       ),
       section(
-        "Key Takeaways",
-        ul("Separate working, project, and long-term memory.", "Concise, reasoned rules beat long transcripts.", "Treat memory like code: reviewed and versioned."),
+        "Chapter Summary & Next Steps",
+        ul(
+          "Separate working, project, and long-term memory.",
+          "Keep project context concise, reasoned, and version-controlled.",
+          "Load only what is relevant for the current task.",
+          "Make updating memory part of normal engineering practice."
+        ),
+        p("Next → Chapter 8: Structuring Inputs (Markdown, JSON, code) for Optimal Grok Consumption.")
       ),
     ],
   },
+
+  // ==================== CHAPTER 8 ====================
   {
     id: 8,
     slug: "structuring-inputs-markdown-json-code",
@@ -51,246 +106,363 @@ TypeScript, Postgres, deployed on edge workers.
     subtitle: "Format what you send so Grok can parse, prioritize, and act on it with minimal ambiguity.",
     sections: [
       section(
-        "Overview",
-        p("The same information can be easy or hard for a model to use depending on its shape. Clear structure reduces misreadings and wasted tokens."),
+        "Chapter Overview & Learning Objectives",
+        p("The same information can be easy or hard for a model to use depending on how it is shaped. Clear structure reduces errors, lowers token usage, and improves tool selection and reasoning quality."),
+        ul(
+          "Choose the right format for different kinds of information.",
+          "Use consistent labeling and delimiters.",
+          "Avoid common formatting mistakes that confuse models.",
+          "Design inputs that work well with both human readers and Grok."
+        )
       ),
       section(
         "Choosing the Right Format",
         ul(
-          "**Markdown:** instructions, documentation, and hierarchical prose.",
-          "**JSON:** structured records, configuration, and anything the output must mirror.",
-          "**XML-style tags:** wrapping distinct inputs like `<spec>`, `<code>`, `<logs>`.",
-          "**Code blocks:** source files with filenames and language hints.",
-        ),
+          "**Markdown** — Best for instructions, documentation, hierarchical prose, and most system prompts.",
+          "**JSON** — Ideal for structured data, configuration, and any content that must later be parsed programmatically.",
+          "**XML-style tags** — Excellent for clearly separating different sections (`<task>`, `<code>`, `<logs>`, `<constraints>`).",
+          "**Fenced code blocks** — Always include the language and, when possible, the filename.",
+          "**Diffs** — Prefer unified diffs when asking for code reviews or changes."
+        )
       ),
       section(
-        "Patterns That Work",
-        code("markdown", `<task>Fix the failing test.</task>
+        "High-Signal Input Patterns",
+        code(
+          "markdown",
+          `<task>
+Fix the failing test and explain the root cause.
+</task>
 
 <file path="src/cart.ts">
-...source...
+// current source code
 </file>
 
 <test_output>
-Expected 1200, received 1199
-</test_output>`),
-        ol("Put instructions first and repeat the key ask at the end of long inputs.", "Label every artifact with its source.", "Trim irrelevant content — noise dilutes attention.", "Use consistent key names across requests."),
+Expected: 1200
+Received: 1199
+</test_output>
+
+<constraints>
+- Do not change the public API
+- Keep the fix minimal
+</constraints>`
+        ),
+        ol(
+          "Put the most important instructions first and restate the key ask at the end of long inputs.",
+          "Label every artifact clearly (file path, source, timestamp, etc.).",
+          "Remove irrelevant content — noise dilutes attention.",
+          "Be consistent with key names and structure across requests."
+        )
       ),
       section(
-        "Common Mistakes",
-        ul("Pasting entire repositories when three files matter.", "Mixing instructions inside data blobs.", "Minified JSON that hides structure.", "Omitting file paths, forcing the model to guess."),
+        "Common Mistakes to Avoid",
+        ul(
+          "Pasting an entire repository when only three files matter.",
+          "Mixing instructions inside large data blobs.",
+          "Sending minified JSON or single-line code.",
+          "Omitting file paths or context about where the code lives.",
+          "Using inconsistent formatting between turns."
+        )
       ),
       section(
-        "Key Takeaways",
-        ul("Structure is a signal of importance.", "Tag and label every input.", "Less, cleaner context beats more, noisier context."),
+        "Chapter Summary & Next Steps",
+        ul(
+          "Structure is a strong signal of importance.",
+          "Clear labels and delimiters dramatically improve reliability.",
+          "Less, cleaner context almost always beats more, noisier context.",
+          "Design inputs for both the model and the humans who will debug them."
+        ),
+        p("Next → Chapter 9: Advanced Memory Enhancement, Retrieval, and Persistence Techniques.")
       ),
     ],
   },
+
+  // ==================== CHAPTER 9 ====================
   {
     id: 9,
     slug: "advanced-memory-retrieval-persistence",
     part: PART_2,
     title: "Advanced Memory Enhancement, Retrieval, and Persistence Techniques",
-    subtitle: "Combine retrieval, summarization, and structured stores to give agents reliable recall at any scale.",
+    subtitle: "Combine retrieval, summarization, and structured stores so agents can recall the right information at any scale.",
     sections: [
       section(
-        "Overview",
-        p("When knowledge outgrows a context window, agents need retrieval. This chapter covers embeddings, hybrid search, memory writing policies, and persistence."),
+        "Chapter Overview & Learning Objectives",
+        p("When knowledge exceeds the practical context window, agents need retrieval. This chapter covers how to move from simple project files to robust retrieval-augmented systems while keeping memory accurate and manageable."),
+        ul(
+          "Design good chunking and embedding strategies.",
+          "Combine vector search with keyword search (hybrid retrieval).",
+          "Decide what should be written into long-term memory.",
+          "Maintain provenance and confidence for retrieved knowledge.",
+          "Avoid memory pollution and staleness."
+        )
       ),
       section(
         "Retrieval Fundamentals",
         ul(
-          "**Chunking:** split documents on semantic boundaries (headings, functions), not fixed characters.",
-          "**Embeddings:** vectorize chunks for similarity search.",
-          "**Hybrid search:** combine vector similarity with keyword search for exact identifiers.",
-          "**Reranking:** reorder the top candidates with a stronger model before inserting them.",
-        ),
+          "**Chunking** — Split on semantic boundaries (headings, functions, sections) rather than fixed character counts.",
+          "**Embeddings** — Turn chunks into vectors for similarity search.",
+          "**Hybrid Search** — Combine dense vector search with sparse keyword search for exact identifiers and names.",
+          "**Reranking** — Use a stronger model or cross-encoder to reorder the top candidates before inserting them into context.",
+          "**Metadata filtering** — Restrict results by date, project area, document type, or confidence."
+        )
       ),
       section(
         "Memory Writing Policies",
-        p("Deciding what to remember matters as much as retrieval. Store durable facts, preferences, and decisions; skip transient chatter."),
-        code("typescript", `type MemoryRecord = {
-  kind: "fact" | "preference" | "decision"
-  content: string
-  source: string        // session or document id
-  confidence: number
-  updatedAt: string
-}`),
+        p("Not everything should be remembered. Write durable facts, architectural decisions, user preferences, and verified outcomes. Skip transient conversation and low-confidence speculation."),
+        code(
+          "typescript",
+          `type MemoryRecord = {
+  id: string;
+  kind: "fact" | "decision" | "preference" | "incident";
+  content: string;
+  source: string;
+  confidence: number;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+};`
+        )
       ),
       section(
-        "Persistence & Consistency",
-        ul("Deduplicate before writing.", "Version records and supersede instead of deleting.", "Attach sources so answers can cite them.", "Expire low-confidence memories automatically."),
+        "Persistence & Consistency Practices",
+        ul(
+          "Deduplicate before writing.",
+          "Prefer superseding old records over silent contradiction.",
+          "Always store the source so answers can be cited.",
+          "Expire or re-verify low-confidence and old memories.",
+          "Make memory updates reviewable (especially for project-level decisions)."
+        )
       ),
       section(
-        "Key Takeaways",
-        ul("Chunk semantically and search hybrid.", "Write memory selectively with provenance.", "Rerank and cite to keep answers grounded."),
+        "Chapter Summary & Next Steps",
+        ul(
+          "Retrieval quality depends more on chunking and filtering than on embedding model choice alone.",
+          "Write memory selectively and with provenance.",
+          "Hybrid search + reranking is usually worth the extra step.",
+          "Treat long-term memory as a living system that requires maintenance."
+        ),
+        p("Next → Chapter 10: Context Engineering – Token Budgeting, Truncation, Compaction, and Long-Context Optimization.")
       ),
     ],
   },
+
+  // ==================== CHAPTER 10 ====================
   {
     id: 10,
     slug: "context-engineering-token-budgeting",
     part: PART_2,
     title: "Context Engineering: Token Budgeting, Truncation Strategies, Context Compaction, and Long-Context Optimization",
-    subtitle: "Treat the context window as a scarce budget and allocate it deliberately for accuracy, speed, and cost.",
+    subtitle: "Treat the context window as a scarce, expensive resource and allocate it deliberately.",
     sections: [
       section(
-        "Overview",
-        p("Large context windows are not free. Every token costs money and attention. Context engineering is the discipline of deciding exactly what the model sees on each turn."),
-      ),
-      section(
-        "Token Budgeting",
-        code("text", `Total window: 128k
-├── System + tools     8k   (stable, cached)
-├── Project memory     6k
-├── Retrieved docs    30k
-├── History (compact) 20k
-├── Current task       4k
-└── Reserved output   10k`),
-        p("Assign explicit budgets per slot and enforce them in code before each call."),
-      ),
-      section(
-        "Truncation & Compaction Strategies",
+        "Chapter Overview & Learning Objectives",
+        p("Even very large context windows are finite and costly. Context engineering is the discipline of deciding exactly what the model sees on every turn so that quality stays high while cost and latency stay under control."),
         ul(
-          "**Sliding window:** keep the last N turns verbatim.",
-          "**Rolling summary:** compress older turns into a running summary.",
-          "**Tool-result pruning:** keep conclusions, drop raw payloads once used.",
-          "**Priority truncation:** cut lowest-relevance retrieved chunks first.",
+          "Assign explicit token budgets to different parts of the context.",
+          "Apply truncation and compaction strategies that preserve the most important information.",
+          "Optimize for prompt caching.",
+          "Avoid classic long-context failure modes (lost-in-the-middle, dilution, stale information)."
+        )
+      ),
+      section(
+        "Token Budgeting Framework",
+        code(
+          "text",
+          `Example 128k window budget
+├── System + tools          6–8k   (stable, cached)
+├── Project memory          4–8k
+├── Retrieved knowledge    20–40k
+├── Compacted history      15–25k
+├── Current task + artifacts 4–8k
+└── Reserved for output     8–15k`
         ),
+        p("Set hard limits per section and enforce them in code before every model call. Leave a safety margin.")
       ),
       section(
-        "Long-Context Optimization",
-        ul("Place critical instructions at the start and restate them at the end.", "Keep stable content first to maximize cache hits.", "Prefer retrieval over dumping entire corpora.", "Measure accuracy as context grows; quality can drop before the limit."),
-        quote("The best context is the smallest one that still contains everything needed to succeed."),
+        "Compaction & Truncation Strategies",
+        ul(
+          "**Sliding window** — Keep the most recent N turns verbatim.",
+          "**Rolling summary** — Compress older turns into a running summary.",
+          "**Tool-result pruning** — Once a result has been used, replace the full payload with a short conclusion.",
+          "**Priority-based truncation** — Drop lowest-relevance retrieved chunks first.",
+          "**Structured compaction** — Ask Grok to produce a concise state summary that becomes the new history."
+        )
       ),
       section(
-        "Key Takeaways",
-        ul("Budget the window like memory in an embedded system.", "Compact history continuously.", "Ordering affects both quality and cost."),
+        "Long-Context Best Practices",
+        ul(
+          "Put critical instructions at the beginning and restate the key goal at the end.",
+          "Keep stable content (system prompt, tools, core project rules) first to maximize cache hits.",
+          "Prefer retrieval over dumping large documents.",
+          "Measure quality as context grows — more tokens do not always improve results.",
+          "Watch for “lost-in-the-middle” effects; important facts can be overlooked if buried deeply."
+        ),
+        quote("The best context is the smallest one that still contains everything the model needs to succeed.")
+      ),
+      section(
+        "Chapter Summary & Next Steps",
+        ul(
+          "Budget the context window like a scarce resource.",
+          "Compact continuously rather than waiting for the limit.",
+          "Design for caching by keeping stable prefixes identical.",
+          "Measure real task success, not just how much context you managed to stuff in."
+        ),
+        p("Next → Chapter 11: Tools, Permissions, Function Calling, and Security Guardrails.")
       ),
     ],
   },
+
+  // ==================== CHAPTER 11 ====================
   {
     id: 11,
     slug: "tools-permissions-function-calling-security",
     part: PART_2,
     title: "Tools, Permissions, Function Calling, and Security Guardrails",
-    subtitle: "Give Grok real capabilities while keeping authority, validation, and safety firmly in your code.",
+    subtitle: "Give Grok real capabilities while keeping authority, validation, and safety firmly under your control.",
     sections: [
       section(
-        "Overview",
-        p("Function calling lets Grok request actions through typed schemas. Security depends on treating every call as an untrusted proposal."),
+        "Chapter Overview & Learning Objectives",
+        p("Tools turn Grok from a text generator into an actor. The difference between a useful agent and a dangerous one lies in how carefully you define, validate, and authorize those tools."),
+        ul(
+          "Design clear, narrow tool schemas.",
+          "Implement a robust permission and validation layer.",
+          "Distinguish between read-only, write, and high-risk actions.",
+          "Defend against prompt injection and tool misuse.",
+          "Log and audit every tool invocation."
+        )
       ),
       section(
-        "Defining Tools",
-        code("json", `{
+        "Tool Design Principles",
+        ul(
+          "Prefer many narrow tools over a few overly powerful ones.",
+          "Write precise descriptions — the model relies on them for selection.",
+          "Use strict JSON Schema (types, enums, minimum/maximum, required fields).",
+          "Make side-effects explicit in the tool description.",
+          "Return structured errors the model can understand and recover from."
+        ),
+        code(
+          "json",
+          `{
   "name": "get_invoice",
-  "description": "Fetch one invoice by id for the current user.",
+  "description": "Fetch a single invoice by ID for the currently authenticated user. Read-only.",
   "parameters": {
     "type": "object",
-    "properties": { "invoice_id": { "type": "string" } },
+    "properties": {
+      "invoice_id": { "type": "string", "description": "The invoice ID" }
+    },
     "required": ["invoice_id"]
   }
-}`),
-        p("Clear names and descriptions drive correct tool selection. Keep each tool narrow and single-purpose."),
+}`
+        )
       ),
       section(
-        "Permission Model",
+        "Permission & Safety Model",
         ul(
-          "**Least privilege:** expose only the tools a task needs.",
-          "**Tiered risk:** read-only tools run freely; writes need validation; destructive actions need human approval.",
-          "**User scoping:** enforce identity server-side — never trust IDs from model arguments alone.",
-        ),
+          "**Least privilege** — Only expose the tools the current task actually needs.",
+          "**Tiered risk** — Read-only tools can be free; writes require stronger validation; destructive or irreversible actions require human approval or very high confidence.",
+          "**Server-side enforcement** — Never trust the model to respect permissions. Check identity, ownership, and policy in your own code before executing anything.",
+          "**Idempotency** — Design write tools so that retries are safe."
+        )
       ),
       section(
         "Security Guardrails",
-        ul("Validate arguments against strict schemas.", "Defend against prompt injection in tool outputs by treating them as data.", "Rate-limit and time-box every tool.", "Log every call with arguments and outcome for audit.", "Redact secrets before content enters the context."),
+        ul(
+          "Validate every argument against the schema before execution.",
+          "Treat all tool results as untrusted data (prompt-injection risk).",
+          "Apply rate limits, timeouts, and size limits.",
+          "Log tool name, arguments (redacted if sensitive), latency, and outcome.",
+          "Redact secrets before any content enters the model context."
+        ),
+        quote("Grok proposes. Your code disposes.")
       ),
       section(
-        "Key Takeaways",
-        ul("Tools are proposals; your code holds authority.", "Scope, validate, approve, and log.", "Narrow tools are safer and easier for Grok to use correctly."),
+        "Chapter Summary & Next Steps",
+        ul(
+          "Narrow, well-described tools are safer and more reliable.",
+          "Authority must live in your runtime, not in the prompt.",
+          "Validate, authorize, execute, log — in that order.",
+          "Design for failure and for audit from day one."
+        ),
+        p("Next → Chapter 12: Extended Thinking, Chain-of-Thought, Reasoning Effort Levels, and Multi-Step Reasoning Modes.")
       ),
     ],
   },
+
+  // ==================== CHAPTER 12 ====================
   {
     id: 12,
     slug: "extended-thinking-reasoning-modes",
     part: PART_2,
     title: "Extended Thinking, Chain-of-Thought, Reasoning Effort Levels, and Multi-Step Reasoning Modes",
-    subtitle: "Control how deeply Grok reasons and structure multi-step problems for accuracy without wasted compute.",
+    subtitle: "Control how deeply Grok thinks and structure hard problems so that extra reasoning actually improves outcomes.",
     sections: [
       section(
-        "Overview",
-        p("Reasoning models think before answering. Knowing when to spend more thinking — and how to structure hard problems — separates reliable systems from expensive guesswork."),
-      ),
-      section(
-        "Reasoning Effort Levels",
+        "Chapter Overview & Learning Objectives",
+        p("Modern Grok models perform internal extended thinking before answering. Knowing when to spend more reasoning tokens — and how to guide that reasoning — is a key engineering skill."),
         ul(
-          "**Low:** classification, formatting, straightforward lookups.",
-          "**Medium:** typical coding and analysis tasks.",
-          "**High:** ambiguous planning, complex debugging, math, and high-stakes decisions.",
-        ),
-        p("Increase effort only when evaluation shows a quality gain worth the latency."),
+          "Select appropriate reasoning_effort levels for different tasks.",
+          "Combine reasoning controls with good prompt patterns.",
+          "Structure multi-step work into plan → execute → verify cycles.",
+          "Avoid wasting tokens on over-thinking simple problems.",
+          "Measure when higher effort actually improves results."
+        )
       ),
       section(
-        "Structuring Multi-Step Reasoning",
+        "Understanding Reasoning Effort",
+        ul(
+          "**Low** — Classification, routing, formatting, simple extraction, lightweight tool use.",
+          "**Medium** — Typical coding, analysis, and most production agent turns.",
+          "**High** — Complex debugging, architecture decisions, ambiguous planning, hard reasoning.",
+          "**xhigh** — Reserved for the most difficult problems where maximum depth is justified."
+        ),
+        p("Higher effort increases latency and cost. It is not a substitute for missing context, poor tools, or unclear goals.")
+      ),
+      section(
+        "Prompt Patterns That Work With Reasoning",
+        ul(
+          "Ask for a numbered plan before any action.",
+          "Require the model to list assumptions and uncertainties.",
+          "Force step-by-step execution with verification after each step.",
+          "Request explicit self-critique before the final answer.",
+          "Tell the model when to stop and ask for clarification instead of guessing."
+        ),
+        code(
+          "text",
+          `First, think step by step and produce a short plan.
+Then execute only the first step and report the result.
+Do not continue until I confirm.`
+        )
+      ),
+      section(
+        "Multi-Step Reasoning Pattern",
         ol(
-          "**Plan:** ask for a numbered plan before execution.",
-          "**Execute:** perform one step per turn with tool feedback.",
-          "**Verify:** check each result against explicit criteria.",
-          "**Revise:** update the plan when evidence contradicts it.",
+          "**Plan** — Model produces a clear sequence of steps.",
+          "**Execute** — Perform one step (often with tools).",
+          "**Observe** — Feed the result back.",
+          "**Verify** — Check whether the step succeeded and whether the overall plan still holds.",
+          "**Revise** — Update the plan if new evidence requires it.",
+          "**Repeat** until the goal is met or a budget is exhausted."
+        )
+      ),
+      section(
+        "Common Pitfalls",
+        ul(
+          "Using high or xhigh effort for simple tasks (expensive and slow).",
+          "Expecting reasoning alone to compensate for missing information.",
+          "Letting the model generate very long internal chains that still start from wrong premises.",
+          "Relying on hidden reasoning as a safety mechanism (it is not)."
+        )
+      ),
+      section(
+        "Chapter Summary & Next Steps",
+        ul(
+          "Match reasoning effort to task difficulty.",
+          "Structure hard work into explicit plan–execute–verify loops.",
+          "Measure the quality gain of higher effort — don’t assume it is always better.",
+          "Good context and tools usually deliver more improvement than simply turning effort up."
         ),
-        code("text", `First, list the steps you will take.
-Then complete step 1 only and report the result.
-Stop and wait for confirmation before step 2.`),
-      ),
-      section(
-        "Pitfalls",
-        ul("Over-thinking simple tasks inflates cost.", "Long reasoning can still start from wrong premises — supply evidence.", "Do not depend on reasoning traces as a security boundary."),
-      ),
-      section(
-        "Key Takeaways",
-        ul("Match effort to difficulty.", "Plan–execute–verify beats one giant request.", "Better context usually beats more thinking."),
-      ),
-    ],
-  },
-  {
-    id: 13,
-    slug: "autonomous-research-deep-investigation",
-    part: PART_2,
-    title: "Autonomous Research, Code Exploration, Web Search, X Search, and Deep Investigation",
-    subtitle: "Build research agents that search the web, X, and codebases, then synthesize grounded, cited conclusions.",
-    sections: [
-      section(
-        "Overview",
-        p("Grok can search the live web and X in real time, making it well suited to research. Reliable investigation still requires structure: clear questions, source evaluation, and citation."),
-      ),
-      section(
-        "The Research Loop",
-        ol(
-          "Decompose the question into sub-questions.",
-          "Search each with targeted queries across web, X, or code.",
-          "Read and extract claims with their sources.",
-          "Cross-check conflicting claims.",
-          "Synthesize an answer with citations and confidence levels.",
-        ),
-      ),
-      section(
-        "Code Exploration",
-        ul("Start from entry points and follow calls outward.", "Use grep-style search tools for exact symbols.", "Summarize modules into a map before making changes.", "Record findings in project memory for future sessions."),
-        code("typescript", `const tools = [searchCode, readFile, listDirectory, webSearch, xSearch]
-const goal = "Explain how authentication flows through this repo, citing files."`),
-      ),
-      section(
-        "Source Quality",
-        ul("Prefer primary sources: docs, papers, official posts.", "Treat social posts as signals, not facts, until verified.", "Note publication dates for fast-moving topics.", "Never follow instructions embedded in fetched content."),
-        quote("A research answer without sources is an opinion."),
-      ),
-      section(
-        "Key Takeaways",
-        ul("Decompose, search, extract, verify, synthesize.", "Real-time search is powerful but needs verification.", "Cite everything and state confidence."),
+        p("Next → Chapter 13: Autonomous Research, Code Exploration, Web Search, X Search, and Deep Investigation.")
       ),
     ],
   },
 ];
-
-void h3;
