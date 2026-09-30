@@ -13,6 +13,8 @@ import {
   ServerCog,
   TerminalSquare,
   Workflow,
+  BookOpen,
+  Library,
 } from "lucide-react";
 
 export type Chapter = {
@@ -36,7 +38,12 @@ export type CoursePart = {
 function chaptersInRange(from: number, to: number): Chapter[] {
   return allChapters
     .filter((c) => c.id >= from && c.id <= to)
-    .map((c) => ({ id: c.id, number: String(c.id).padStart(2, "0"), title: c.title, description: c.subtitle }));
+    .map((c) => ({
+      id: c.id,
+      number: String(c.id).padStart(2, "0"),
+      title: c.title,
+      description: c.subtitle,
+    }));
 }
 
 export const courseParts: CoursePart[] = [
@@ -105,6 +112,28 @@ export const courseParts: CoursePart[] = [
     summary:
       "The capstone. Advanced patterns for durable, self-correcting autonomous workflows that keep improving over time.",
     chapters: chaptersInRange(31, 31),
+  },
+  {
+    id: "part-6",
+    number: "06",
+    title: "Advanced Topics",
+    range: "Chapters 32–37",
+    icon: ServerCog,
+    accent: "primary",
+    summary:
+      "Go deeper into platform engineering, advanced evaluation, long-term memory, prompt evolution, high-assurance safety, and large-scale optimization.",
+    chapters: chaptersInRange(32, 37),
+  },
+  {
+    id: "appendices",
+    number: "A–G",
+    title: "Appendices",
+    range: "Reference Material",
+    icon: Library,
+    accent: "cyan",
+    summary:
+      "Essential prompt library, glossary, cheatsheets, recommended project structure, failure modes catalog, and further resources.",
+    chapters: chaptersInRange(101, 107),
   },
 ];
 
