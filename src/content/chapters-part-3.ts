@@ -310,4 +310,72 @@ Be precise and professional; keep findings concise.`
       ),
     ],
   },
+    // ==================== CHAPTER 19 ====================
+  {
+    id: 19,
+    slug: "ecosystem-integrations-workspace-customization",
+    part: PART_3,
+    title: "Ecosystem Integrations and Workspace Customization",
+    subtitle: "Embed Grok deeply into the tools developers already use and create a consistent AI-native workspace.",
+    sections: [
+      section(
+        "Chapter Overview & Learning Objectives",
+        p("The real power of Grok appears when it lives inside the same environments where engineers already work — IDEs, terminals, CI, documentation systems, and internal tools — while sharing the same skills, memory, and policies."),
+        ul(
+          "Integrate Grok with IDEs, terminals, and browsers.",
+          "Customize Grok Build workspaces with skills, hooks, and project context.",
+          "Use MCP as a universal tool bridge.",
+          "Keep configuration consistent across surfaces.",
+          "Avoid configuration drift and secret leakage."
+        )
+      ),
+      section(
+        "Integration Layers",
+        ul(
+          "**Human-facing surfaces** — IDE extensions, Grok Build TUI, browser UIs, chat apps.",
+          "**Orchestration & policy** — Skills, memory, permissions, prompt library.",
+          "**Model + tools** — Grok API, built-in tools, MCP servers, custom functions."
+        ),
+        p("The goal is that every surface talks to the same well-configured agentic core instead of inventing its own ad-hoc prompting.")
+      ),
+      section(
+        "Grok Build Workspace Layout",
+        code(
+          "text",
+          `project-root/
+├── .grok/
+│   ├── skills/           # project skills
+│   ├── context/          # medium-term memory
+│   ├── hooks/            # lifecycle scripts
+│   └── config.toml       # optional overrides
+├── AGENTS.md             # high-level instructions
+└── ...`
+        ),
+        p("Grok Build automatically discovers these locations. Keeping configuration in the repository makes it versioned and shared by the whole team.")
+      ),
+      section(
+        "MCP as the Universal Bridge",
+        p("Expose internal systems (issue trackers, observability platforms, design systems, company APIs) as MCP servers. Once registered, the same tools become available to Grok Build, API agents, and multi-agent supervisors without rewriting wrappers.")
+      ),
+      section(
+        "Consistency Rules",
+        ul(
+          "Project-level configuration lives in the repository.",
+          "User-level preferences and credentials live in the home directory.",
+          "Secrets never live in the repository.",
+          "The same skills and memory should be visible from the IDE, terminal, and CI."
+        )
+      ),
+      section(
+        "Chapter Summary & Next Steps",
+        ul(
+          "Deep integration beats isolated chat windows.",
+          "Keep skills, memory, and policy in the repository.",
+          "Use MCP to avoid tool duplication.",
+          "Design for consistency across every surface the team uses."
+        ),
+        p("This concludes Part 3. Next → Part 4 begins with Chapter 20: Git Workflows, Branching Strategies, and Automated Commits with Grok.")
+      ),
+    ],
+  },
 ];
