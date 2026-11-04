@@ -24,6 +24,18 @@ export type Chapter = {
   description: string;
 };
 
+export function chapterNumber(id: number): string {
+  return id >= 101 && id <= 107 ? String.fromCharCode(65 + id - 101) : String(id).padStart(2, "0");
+}
+
+export function chapterLabel(id: number): string {
+  return `${id >= 101 ? "Appendix" : "Chapter"} ${chapterNumber(id)}`;
+}
+
+export function partLabel(part: CoursePart): string {
+  return part.id === "bonus" ? "Supplement" : part.id === "appendices" ? "Reference" : `Part ${part.number}`;
+}
+
 export type CoursePart = {
   id: string;
   number: string;
@@ -40,7 +52,7 @@ function chaptersInRange(from: number, to: number): Chapter[] {
     .filter((c) => c.id >= from && c.id <= to)
     .map((c) => ({
       id: c.id,
-      number: String(c.id).padStart(2, "0"),
+      number: chapterNumber(c.id),
       title: c.title,
       description: c.subtitle,
     }));
@@ -138,3 +150,6 @@ export const courseParts: CoursePart[] = [
 ];
 
 export const totalSections = courseParts.reduce((sum, part) => sum + part.chapters.length, 0);
+export const orderedChapters = courseParts.flatMap((part) => part.chapters);
+export const totalChapters = orderedChapters.filter((chapter) => chapter.id < 101).length;
+export const totalAppendices = totalSections - totalChapters;

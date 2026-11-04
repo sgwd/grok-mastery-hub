@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { totalChapters, totalAppendices } from "@/components/site/course-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,7 +34,7 @@ export const Route = createFileRoute("/")({
 });
 
 const features = [
-  { icon: BookOpen, title: "30 Deep Technical Chapters", description: "A complete curriculum built for engineers who want depth, not shortcuts." },
+  { icon: BookOpen, title: `${totalChapters} Deep Technical Chapters`, description: "A complete curriculum built for engineers who want depth, not shortcuts." },
   { icon: GitBranch, title: "Multi-Agent Systems", description: "Design specialized agents that coordinate, delegate, and solve together." },
   { icon: Braces, title: "Production Patterns", description: "Apply reliable architectures, fallbacks, and deployment-ready practices." },
   { icon: LockKeyhole, title: "Tool Calling & Security", description: "Connect tools safely with permissions, validation, and human oversight." },
@@ -91,7 +92,7 @@ function Index() {
             </Button>
           </div>
           <div className="mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 font-mono text-xs text-muted-foreground">
-            <span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-cyan" />30 chapters</span>
+            <span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-cyan" />{totalChapters} chapters · {totalAppendices} appendices</span>
             <span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-primary" />6 learning tracks</span>
             <span className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-cyan" />Production focused</span>
           </div>
