@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { courseParts, totalSections, type CoursePart } from "@/components/site/course-data";
+import { courseParts, partLabel, totalChapters, totalAppendices, totalSections, type CoursePart } from "@/components/site/course-data";
 
 export const Route = createFileRoute("/course")({
   head: () => ({
@@ -23,13 +23,13 @@ export const Route = createFileRoute("/course")({
       {
         name: "description",
         content:
-          "The complete 30-chapter Grok Mastery course plus the Loop Engineering Supplement — from foundations to enterprise multi-agent systems.",
+           "The complete Grok Mastery course: six parts, the Loop Engineering Supplement, and appendices in a clear reading order.",
       },
       { property: "og:title", content: "Course Overview — Grok Mastery" },
       {
         property: "og:description",
         content:
-          "The complete 30-chapter Grok Mastery course plus the Loop Engineering Supplement — from foundations to enterprise multi-agent systems.",
+           "The complete Grok Mastery course: six parts, the Loop Engineering Supplement, and appendices in a clear reading order.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -92,11 +92,11 @@ function CoursePage() {
               Course <span className="bg-gradient-to-r from-primary to-cyan bg-clip-text text-transparent">Overview</span>
             </h1>
             <p className="text-balance mt-6 text-xl font-medium leading-8 text-foreground/90 sm:text-2xl sm:leading-9">
-              Grok Mastery Guide — 30 Chapters + Loop Engineering Supplement
+              Grok Mastery Guide — {totalChapters} Chapters · {totalAppendices} Appendices
             </p>
             <p className="mx-auto mt-5 max-w-2xl text-balance text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
               A deliberate learning path that moves you from first principles to production-grade autonomous systems:
-              Foundations → Core Skills → Extending Grok → Shipping Real Software → Mastery & Enterprise Patterns.
+              Foundations → Core Skills → Extending Grok → Shipping Real Software → Mastery & Enterprise Patterns → Loop Engineering Supplement → Advanced Topics → Appendices.
             </p>
 
             {/* Progress */}
@@ -192,7 +192,7 @@ function CoursePage() {
                   {totalSections} sections
                 </div>
                 <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                  {courseParts.length} parts covering foundations through enterprise multi-agent systems.
+                    6 course parts, a supplement, and a separate appendix reference section.
                 </p>
               </div>
             </div>
@@ -280,7 +280,7 @@ function PartSection({
         <div className="flex-1">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-              Part {part.number}
+              {partLabel(part)}
             </span>
             <span className="font-mono text-xs text-muted-foreground/70">{part.range}</span>
           </div>

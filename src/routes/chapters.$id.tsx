@@ -1,9 +1,19 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { ChapterReader } from "@/components/site/chapter-reader";
-import { allChapters, getChapterContent } from "@/content/chapters";
-import type { Chapter } from "@/components/site/course-data";
+import { getChapterContent } from "@/content/chapters";
+import { orderedChapters, chapterNumber, chapterLabel, type Chapter } from "@/components/site/course-data";
 
 export const Route = createFileRoute("/chapters/$id")({
+  head: ({ params }) => {
+    const content = getChapterContent(params.id);
+    const title = content ? `${chapterLabel(content.id)}: ${content.title} — Grok Mastery` : "Chapter not found — Grok Mastery";
+    const description = content?.subtitle ?? "Return to the Grok Mastery chapter directory to choose a chapter.";
+    return { meta: [
+      { title }, { name: "description", content: description },
+      { property: "og:title", content: title }, { property: "og:description", content: description },
+      { property: "og:type", content: "article" }, { name: "twitter:card", content: "summary_large_image" },
+    ] };
+  },
   component: ChapterPage,
 });
 
@@ -16,14 +26,6 @@ function ChapterPage() {
     throw notFound();
   }
 
-  // Build a flat ordered list of all chapters (including Part 6 + Appendices)
-  const orderedChapters: Chapter[] = allChapters.map((c) => ({
-    id: c.id,
-    number: String(c.id).padStart(2, "0"),
-    title: c.title,
-    description: c.subtitle,
-  }));
-
   const currentIndex = orderedChapters.findIndex((c) => c.id === numericId);
 
   const previous = currentIndex > 0 ? orderedChapters[currentIndex - 1] : undefined;
@@ -31,7 +33,7 @@ function ChapterPage() {
 
   const chapter: Chapter = {
     id: content.id,
-    number: String(content.id).padStart(2, "0"),
+    number: chapterNumber(content.id),
     title: content.title,
     description: content.subtitle,
   };

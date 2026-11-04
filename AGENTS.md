@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Chapter content lives in src/content/ (one file per part, typed blocks); course TOC derives from it — single source of truth.
+- Directory and previous/next navigation share course-data's orderedChapters; keep stable chapter URLs and display reference IDs as appendix letters to avoid conflicting reading orders.

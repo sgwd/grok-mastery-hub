@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { totalSections, type Chapter } from "@/components/site/course-data";
+import { chapterLabel, orderedChapters, totalSections, type Chapter } from "@/components/site/course-data";
 import { slugifyHeading, type ChapterContent, type ContentBlock } from "@/content/chapters";
 import { cn } from "@/lib/utils";
 
@@ -232,12 +232,15 @@ export function ChapterReader({
         >
           <ArrowLeft className="size-4" aria-hidden="true" /> Back to Course
         </Link>
+        <Link to="/chapters" className="ml-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <ListTree className="size-4" aria-hidden="true" /> All chapters
+        </Link>
 
         <header className="max-w-4xl border-b border-border pb-10 pt-12 sm:pb-14 sm:pt-16">
-          <div className="font-mono text-xs uppercase text-cyan">Chapter {chapter.number}</div>
+          <div className="font-mono text-xs uppercase text-cyan">{chapterLabel(chapter.id)}</div>
           <h1 className="text-balance mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">{content.title}</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground sm:text-xl">{content.subtitle}</p>
-          <div className="mt-7 flex items-center gap-2 font-mono text-xs text-muted-foreground">
+          <div className="mt-7 flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
             <Clock3 className="size-3.5 text-primary" aria-hidden="true" /> {readMinutes} min read
             <span aria-hidden="true">·</span> {content.part}
           </div>
@@ -284,7 +287,7 @@ export function ChapterReader({
 
           <article className="min-w-0 max-w-[45rem]">
             {content.sections.map((sec, index) => (
-              <ReadingSection key={index} id={sections[index]!.id} title={sec.heading}>
+              <ReadingSection key={index} id={slugifyHeading(sec.heading)} title={sec.heading}>
                 {sec.content.map((block, i) => <Block key={i} block={block} />)}
               </ReadingSection>
             ))}
@@ -294,7 +297,7 @@ export function ChapterReader({
                 <Button asChild variant="outline" className="h-auto justify-start whitespace-normal px-5 py-4 text-left">
                   <Link to="/chapters/$id" params={{ id: String(previous.id) }}>
                     <ArrowLeft />
-                    <span><span className="block text-xs text-muted-foreground">Previous chapter</span>{previous.title}</span>
+                    <span><span className="block text-xs text-muted-foreground">Previous · {chapterLabel(previous.id)}</span>{previous.title}</span>
                   </Link>
                 </Button>
               ) : (
@@ -308,7 +311,7 @@ export function ChapterReader({
               {next && (
                 <Button asChild variant="outline" className="h-auto justify-end whitespace-normal px-5 py-4 text-right">
                   <Link to="/chapters/$id" params={{ id: String(next.id) }}>
-                    <span><span className="block text-xs text-muted-foreground">Next chapter</span>{next.title}</span>
+                    <span><span className="block text-xs text-muted-foreground">Next · {chapterLabel(next.id)}</span>{next.title}</span>
                     <ArrowRight />
                   </Link>
                 </Button>
@@ -318,9 +321,9 @@ export function ChapterReader({
 
           <aside className="hidden xl:block">
             <div className="sticky top-28 border-l border-border pl-5">
-              <p className="font-mono text-[0.6875rem] uppercase text-muted-foreground">Reading progress</p>
-              <p className="mt-2 text-2xl font-semibold text-foreground">{chapter.number}</p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">of {totalSections} chapters</p>
+              <p className="font-mono text-[0.6875rem] uppercase text-muted-foreground">Reading order</p>
+              <p className="mt-2 text-2xl font-semibold text-foreground">{orderedChapters.findIndex((item) => item.id === chapter.id) + 1}</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">of {totalSections} sections</p>
               {next && <p className="mt-6 text-xs leading-5 text-muted-foreground">Up next<br /><span className="text-foreground">{next.title}</span></p>}
             </div>
           </aside>
