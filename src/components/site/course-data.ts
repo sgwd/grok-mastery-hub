@@ -96,23 +96,23 @@ export const courseParts: CoursePart[] = [
     id: "part-4",
     number: "04",
     title: "Shipping Real Software",
-    range: "Chapters 20–25",
+    range: "Chapters 20–24",
     icon: Check,
     accent: "cyan",
     summary:
       "Take agents from prototype to production. Testing, safety, observability, and deployment practices that hold up.",
-    chapters: chaptersInRange(20, 25),
+    chapters: chaptersInRange(20, 24),
   },
   {
     id: "part-5",
     number: "05",
     title: "Mastery & Enterprise Patterns",
-    range: "Chapters 26–30",
+    range: "Chapters 25–30",
     icon: ChartNoAxesCombined,
     accent: "primary",
     summary:
       "Scale beyond a single agent. Coordinate teams of agents, govern behavior, and operate with confidence at organizational scale.",
-    chapters: chaptersInRange(26, 30),
+    chapters: chaptersInRange(25, 30),
   },
   {
     id: "bonus",

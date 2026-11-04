@@ -16,4 +16,8 @@ describe("chapter organization", () => {
   test("distinguishes the supplement and references from numbered course parts", () => {
     expect(courseParts.map(partLabel)).toEqual(["Part 01", "Part 02", "Part 03", "Part 04", "Part 05", "Supplement", "Part 06", "Reference"]);
   });
+  test("groups chapter 25 with its authored Part 5, not Part 4", () => {
+    expect(courseParts.find((part) => part.id === "part-4")?.chapters.map((chapter) => chapter.id)).toEqual([20, 21, 22, 23, 24]);
+    expect(courseParts.find((part) => part.id === "part-5")?.chapters.map((chapter) => chapter.id)).toEqual([25, 26, 27, 28, 29, 30]);
+  });
 });

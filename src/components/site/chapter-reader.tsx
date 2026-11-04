@@ -232,7 +232,7 @@ export function ChapterReader({
         >
           <ArrowLeft className="size-4" aria-hidden="true" /> Back to Course
         </Link>
-        <Link to="/chapters/" className="ml-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/chapters" className="ml-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ListTree className="size-4" aria-hidden="true" /> All chapters
         </Link>
 
