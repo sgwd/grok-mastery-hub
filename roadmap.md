@@ -7,5 +7,5 @@
 - [x] Add page-specific metadata and verify desktop/mobile rendering
 - [x] Build and verify the reusable long-form chapter reading template
 - [x] Replace Chapter 1 placeholder material with complete technical content
-- [ ] Clarify chapter grouping, appendix labels, and sequential navigation
-- [ ] Verify chapter directory and reading order on desktop and mobile
+- [x] Clarify chapter grouping, appendix labels, and sequential navigation
+- [x] Verify chapter directory and reading order on desktop and mobile
