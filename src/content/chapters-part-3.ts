@@ -1,4 +1,4 @@
-import { PART_3, code, h3, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
+import { PART_3, code, h3, sources, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
 
 export const part3Chapters: ChapterContent[] = [
   // ==================== CHAPTER 14 ====================
@@ -8,7 +8,17 @@ export const part3Chapters: ChapterContent[] = [
     part: PART_3,
     title: "Building Custom Prompt Templates, Skills, and Tailored Workflows",
     subtitle: "Turn successful prompts into reusable, versioned skills that your whole team (and your agents) can invoke.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Package native skills with an explicit contract",
+        p("Grok Build discovers project `.grok/skills/` folders, user `~/.grok/skills/` folders, and enabled plugin skills. Each skill begins with `SKILL.md` YAML metadata; scope scripts and resources to the job."),
+        p("Keep API orchestration separate from native skill discovery: an ordinary Responses request does not automatically read your repository skills. Your integration must load and apply the intended asset."),
+        sources("2026-11-10",
+          { label: "Skills Plugins Marketplaces", url: "https://docs.x.ai/build/features/skills-plugins-marketplaces" },
+          { label: "Overview", url: "https://docs.x.ai/build/overview" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("One-off prompts do not scale. High-performing teams convert proven prompts into named skills with clear descriptions, parameters, recommended settings, and output contracts."),
@@ -39,7 +49,7 @@ Description: Perform a thorough, structured code review of a diff or set of file
 
 When to use: When a pull request is opened or a developer asks for a review.
 
-Recommended settings: model=grok-4.6, reasoning_effort=high
+Recommended settings: model=grok-4.7, reasoning_effort=high
 
 Output: JSON following the review schema.`
         )
@@ -86,7 +96,17 @@ Output: JSON following the review schema.`
     part: PART_3,
     title: "Multi-Agent Architecture: Spawning, Managing, and Coordinating Agents",
     subtitle: "Design systems in which multiple specialized Grok agents collaborate on complex work.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Choose native subagents or application orchestration deliberately",
+        p("Grok Build provides explore and plan agent types; custom types live in project or user `.grok/agents/`. Agent personas change behavior, not underlying permission authority."),
+        p("Provider model multi-agent variants, Grok Build subagents, and application-managed supervisors are different mechanisms. Compare each against a single-agent baseline and retain a shared total budget."),
+        sources("2026-11-10",
+          { label: "Subagents", url: "https://docs.x.ai/build/features/subagents" },
+          { label: "Models", url: "https://docs.x.ai/developers/models" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("Some tasks are too broad, too adversarial, or too parallel for a single agent. Multi-agent architectures let you specialize roles, run work in parallel, and introduce deliberate critique."),
@@ -143,7 +163,16 @@ Output: JSON following the review schema.`
     part: PART_3,
     title: "Event Hooks, Triggers, and Automated Pipelines",
     subtitle: "Move from interactive agents to systems that react to real-world events and run without constant human initiation.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Native hooks are not a fail-closed security boundary",
+        p("Grok Build hooks are JSON files in `.grok/hooks/` or `~/.grok/hooks/`; project hooks require trust. `PreToolUse` is the blocking event and can explicitly deny a call."),
+        p("The documented hook contract is fail-open on timeouts, crashes, or malformed output. Enforce critical denials in permissions, sandboxing, or your execution service; a best-effort hook cannot be your only protection."),
+        sources("2026-11-10",
+          { label: "Hooks", url: "https://docs.x.ai/build/features/hooks" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("Interactive agents wait for a human. Event-driven agents react to signals — pull requests, failed deploys, support tickets, scheduled times, metric alerts — and act within defined policy."),
@@ -205,7 +234,18 @@ Output: JSON following the review schema.`
     part: PART_3,
     title: "Tool & Function Calling Deep Dive",
     subtitle: "Master the full tool-calling surface — built-in tools, custom functions, parallel calls, MCP, and production patterns.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Match each function output to its call",
+        p("Responses returns custom `function_call` items. Your caller must return `function_call_output` with the matching `call_id`, and process every requested call before continuing. Preserve other output items, including encrypted reasoning."),
+        p("Set `parallel_tool_calls: false` when tool dependencies require sequence. For remote MCP, use the documented HTTP/SSE transports and explicit allowed tools; provider-managed execution does not grant application approval automatically."),
+        p("The current remote MCP guide says `require_approval` and `connector_id` are not supported. Enforce authorization at the MCP service or route approval-sensitive writes through your own function executor."),
+        sources("2026-11-10",
+          { label: "Function Calling", url: "https://docs.x.ai/developers/tools/function-calling" },
+          { label: "Remote Mcp", url: "https://docs.x.ai/developers/tools/remote-mcp" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("This chapter goes deeper into the practical engineering of tool use: how to mix server-side and client-side tools, control parallelism, handle errors, integrate MCP, and keep large tool ecosystems maintainable."),
@@ -262,7 +302,17 @@ Output: JSON following the review schema.`
     part: PART_3,
     title: "Developing Custom Skills, Output Styles, Structured Outputs, and Response Formats",
     subtitle: "Make agent outputs reliable, machine-readable, and consistent in style.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Supported schemas and truthful structured values",
+        p("Use the endpoint-specific structured-output fields: Chat Completions uses `response_format`; OpenAI-compatible Responses uses `text.format`. Pin client versions and validate the schema against the current supported subset."),
+        p("A structurally valid answer can still contain false values. Validate totals, IDs, references, and ownership separately. Some schema keywords and oversized constraints are best-effort rather than guaranteed."),
+        sources("2026-11-10",
+          { label: "Structured Outputs", url: "https://docs.x.ai/developers/model-capabilities/text/structured-outputs" },
+          { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("Free-form text is ideal for humans but brittle for automation. Structured outputs and deliberate style control turn Grok into a dependable component of larger systems."),
@@ -317,7 +367,18 @@ Be precise and professional; keep findings concise.`
     part: PART_3,
     title: "Ecosystem Integrations and Workspace Customization",
     subtitle: "Embed Grok deeply into the tools developers already use and create a consistent AI-native workspace.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Inspect what the workspace actually discovers",
+        p("Grok Build reads project rules, skills, trusted hooks, and MCP configuration through their documented discovery paths. Run `grok inspect` to confirm what is loaded rather than relying on a directory diagram."),
+        p("User defaults live in `~/.grok/config.toml`. Project `.grok/config.toml` is limited to MCP servers, plugins, and permission rules; it is not a full copy of user configuration. Keep credentials outside repository files."),
+        sources("2026-11-10",
+          { label: "Settings", url: "https://docs.x.ai/build/settings" },
+          { label: "Project Rules", url: "https://docs.x.ai/build/features/project-rules" },
+          { label: "Mcp Servers", url: "https://docs.x.ai/build/features/mcp-servers" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("The real power of Grok appears when it lives inside the same environments where engineers already work — IDEs, terminals, CI, documentation systems, and internal tools — while sharing the same skills, memory, and policies."),
@@ -351,7 +412,7 @@ Be precise and professional; keep findings concise.`
 ├── AGENTS.md             # high-level instructions
 └── ...`
         ),
-        p("Grok Build automatically discovers these locations. Keeping configuration in the repository makes it versioned and shared by the whole team.")
+        p("Grok Build discovers rules, skills, trusted hooks, and supported project configuration. The context folder is a suggested application convention that must be loaded explicitly. Use grok inspect to confirm discovery; keep secrets outside the repository.")
       ),
       section(
         "MCP as the Universal Bridge",

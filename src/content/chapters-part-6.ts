@@ -1,4 +1,4 @@
-import { code, h3, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
+import { code, h3, sources, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
 
 export const PART_6 = "Part 6: Advanced Topics";
 
@@ -10,7 +10,17 @@ export const part6Chapters: ChapterContent[] = [
     part: PART_6,
     title: "Building Internal Agent Platforms & Developer Portals",
     subtitle: "Turn Grok from a collection of scripts into a real internal platform that teams can safely build on.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Publish a tested capability registry",
+        p("Maintain endpoint-specific capability records for tools, effort levels, schemas, retention, and regional routing. A general OpenAI-compatible label does not imply every parameter behaves identically."),
+        p("Remote MCP configuration must include narrowly allowed tools and service-side authorization. The current provider guide does not implement `require_approval`, so expose explicit application approval for sensitive writes."),
+        sources("2026-11-10",
+          { label: "Remote Mcp", url: "https://docs.x.ai/developers/tools/remote-mcp" },
+          { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("As usage grows, individual agents and scripts become hard to govern. Mature organisations build an internal Agent Platform that provides shared authentication, tool access, memory, evaluation, budgets, and observability."),
@@ -66,7 +76,17 @@ export const part6Chapters: ChapterContent[] = [
     part: PART_6,
     title: "Advanced Evaluation Engineering & Agent Benchmarking",
     subtitle: "Go beyond simple golden sets to rigorous, continuous evaluation of agentic systems.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Benchmark observable actions and drift",
+        p("Record model, client version, effort, context size, cache usage, and tool set with each run. Evaluate regressions after both explicit upgrades and provider changes."),
+        p("Encrypted reasoning may be preserved for continuation but cannot be read as a thought transcript. Evaluate source fidelity, policy decisions, actual tool effects, and final task success, with held-out cases and human calibration."),
+        sources("2026-11-10",
+          { label: "Reasoning", url: "https://docs.x.ai/developers/model-capabilities/text/reasoning" },
+          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("Basic evals are not enough for complex agents. This chapter covers trajectory evaluation, multi-dimensional scoring, regression detection, and building an evaluation culture."),
@@ -92,7 +112,7 @@ export const part6Chapters: ChapterContent[] = [
       ),
       section(
         "Trajectory-Level Evaluation",
-        p("For agents, the path matters as much as the destination. Record and score the sequence of thoughts, tool calls, recoveries, and decisions. Look for unnecessary steps, repeated failures, and recovery quality.")
+        p("For agents, the path matters as much as the destination. Record and score observable plans, tool calls, recoveries, and decisions; encrypted internal reasoning is not an inspectable transcript. Look for unnecessary steps, repeated failures, and recovery quality.")
       ),
       section(
         "Evaluation Systems Design",
@@ -123,7 +143,17 @@ export const part6Chapters: ChapterContent[] = [
     part: PART_6,
     title: "Long-Term Memory Architectures (Episodic, Graph, Hierarchical)",
     subtitle: "Design memory systems that scale beyond simple vector stores and remain understandable.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Protect memory throughout its lifecycle",
+        p("Provider response retention, encrypted continuation, native compaction, and long-term semantic memory are separate mechanisms. Choose each deliberately rather than treating them as one universal memory feature."),
+        p("Store tenant ownership and provenance with durable memories. Re-verify changing facts, honor deletion requests across derived summaries and indexes, and never elevate retrieved instructions into policy."),
+        sources("2026-11-10",
+          { label: "Context Compaction", url: "https://docs.x.ai/developers/advanced-api-usage/context-compaction" },
+          { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("Simple retrieval-augmented generation is powerful but limited. Richer memory architectures become necessary as agents operate over months and across many projects."),
@@ -180,7 +210,17 @@ export const part6Chapters: ChapterContent[] = [
     part: PART_6,
     title: "Automated Prompt & Skill Evolution",
     subtitle: "Use evaluation signals to systematically improve prompts and skills over time.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Version every experiment dependency",
+        p("Pin the candidate prompt, model, client, effort, tools, and rubric in experiment records. A gain after an unrecorded model upgrade is not evidence that the prompt improved."),
+        p("Keep hold-out tasks isolated from prompt generation, require safety and cost gates, and stage rollout. Native skills are deployable assets; changing their scripts or permissions deserves review alongside prose."),
+        sources("2026-11-10",
+          { label: "Skills Plugins Marketplaces", url: "https://docs.x.ai/build/features/skills-plugins-marketplaces" },
+          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("Manual prompt engineering does not scale. Mature systems treat prompts and skills as artefacts that can be improved through measurement and controlled experimentation."),
@@ -235,7 +275,19 @@ export const part6Chapters: ChapterContent[] = [
     part: PART_6,
     title: "High-Assurance Agents: Safety, Red-Teaming & Guardrail Engineering",
     subtitle: "Engineer agents that remain safe and reliable even under adversarial or unexpected conditions.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Close the documented approval gaps",
+        p("Test native hook crashes, timeouts, and malformed output: Grok Build hooks are documented as fail-open unless explicitly denied. Do not rely on them as the only control for destructive work."),
+        p("Remote MCP `require_approval` is not currently supported in the provider Responses integration. Enforce permission checks and human approval in your execution service, or offer only read-only remote tools."),
+        p("Encrypted reasoning and moderation preferences do not prove safe behavior. Red-team retrieved documents, tool arguments, approval replay, data exfiltration, and checkpoint recovery."),
+        sources("2026-11-10",
+          { label: "Hooks", url: "https://docs.x.ai/build/features/hooks" },
+          { label: "Remote Mcp", url: "https://docs.x.ai/developers/tools/remote-mcp" },
+          { label: "Reasoning", url: "https://docs.x.ai/developers/model-capabilities/text/reasoning" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("As agents gain more capability and autonomy, safety engineering becomes critical. This chapter covers practical techniques for building high-assurance agentic systems."),
@@ -295,7 +347,19 @@ export const part6Chapters: ChapterContent[] = [
     part: PART_6,
     title: "Cost, Latency & Throughput Optimization at Scale",
     subtitle: "Systematically optimise the performance and economics of large-scale Grok deployments.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Optimize around measured cache hits and pricing tiers",
+        p("At 200,000 prompt tokens, Grok 4.7 switches all request tokens to long-context rates. Track total prompt tokens including cache hits; cached content does not exempt a request from the threshold."),
+        p("Use stable cache routing and prefixes, prune irrelevant retrieval, and compact before the limit. Compare end-to-end task cost; cheaper requests can still create more failures and retries."),
+        p("Account for regional premiums, editor-only Fast pricing, and search fetch charges separately. Bound concurrency against your actual account limits and use backpressure instead of unbounded parallelism."),
+        sources("2026-11-10",
+          { label: "Pricing", url: "https://docs.x.ai/developers/pricing" },
+          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" },
+          { label: "Context Compaction", url: "https://docs.x.ai/developers/advanced-api-usage/context-compaction" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("At scale, small inefficiencies become large bills and poor user experiences. This chapter covers systematic optimisation of cost, latency, and throughput."),

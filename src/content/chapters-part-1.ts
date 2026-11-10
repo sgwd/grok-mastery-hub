@@ -1,4 +1,5 @@
-import { PART_1, code, h3, loop, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
+import { currentModel, modelContextTokens, textRates, longContextThreshold } from "./verified-reference";
+import { PART_1, code, h3, sources, loop, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
 
 export const part1Chapters: ChapterContent[] = [
   // ==================== CHAPTER 1 ====================
@@ -9,10 +10,20 @@ export const part1Chapters: ChapterContent[] = [
     title: "What Grok Is and How the Agentic Loop Works",
     subtitle:
       "Understand Grok’s role inside an agentic system, then build the controlled feedback loop that turns model reasoning into useful, verifiable action.",
+    updatedOn: "2026-11-10",
     sections: [
       section(
+        "Grok 4.7 and the current agent contract",
+        p("The current developer guide lists `grok-4.7`: a 500,000-token context window, text and image input, text output, and a May 2026 knowledge cutoff. Live facts still require retrieval; a newer model is not a live database."),
+        p("Use the Responses API for new text-and-tool integrations. Built-in tools execute at the provider; custom function calls return to your application for validation, authorization, execution, and a matching result."),
+        sources("2026-11-10",
+          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" },
+          { label: "Overview", url: "https://docs.x.ai/developers/tools/overview" }
+        )
+      ),
+      section(
         "Chapter Overview & Learning Objectives",
-        p("Grok is xAI’s family of frontier models designed for high-quality reasoning, coding, and agentic work. The current flagship (Grok 4.6 and related variants) excels at complex multi-step tasks, tool use, and long-context understanding. However, a model alone is not an agent."),
+        p("Grok is xAI’s family of frontier models designed for high-quality reasoning, coding, and agentic work. The current developer guide lists Grok 4.7, which excels at complex multi-step tasks, tool use, and long-context understanding. However, a model alone is not an agent."),
         p("An agent is a system that combines the model with memory, tools, permissions, state management, and clear stopping conditions. Grok provides the reasoning engine. Your application provides the control loop, safety boundaries, and execution environment."),
         quote("An agent is a controlled feedback system: Grok reasons about the current state, your application executes bounded actions, and the resulting evidence becomes the next observation."),
         h3("By the end of this chapter you will be able to"),
@@ -26,7 +37,7 @@ export const part1Chapters: ChapterContent[] = [
       ),
       section(
         "Core Theoretical Principles & Architecture",
-        p("Grok is stateless between API calls. It only knows what you put in the current context. Therefore every useful agent must reconstruct relevant state on each turn and feed tool results back as new observations."),
+        p("Model inference uses the context supplied to that turn. The Responses API can retain conversation state for continuation, while manually managed history must carry the needed prior items. Neither mechanism replaces durable application state or authorization."),
         h3("The Agentic Loop"),
         loop(),
         ol(
@@ -38,8 +49,8 @@ export const part1Chapters: ChapterContent[] = [
         ),
         h3("Server-side vs Client-side Tools"),
         ul(
-          "**Server-side tools** run in your trusted backend. They can safely access secrets, databases, internal APIs, and perform privileged actions.",
-          "**Client-side tools** run on the user’s device or browser. They should be treated as untrusted and limited to UI interactions or explicitly consented local actions."
+          "**Provider built-in tools** run on the provider infrastructure. **Application tools** run in your backend and require your own identity, authorization, secret management, and approval checks.",
+          "**Client-side function calling in API terminology** means execution by the caller, commonly your backend. Browser-local tools are a separate case and must not receive private API keys or unrestricted authority."
         ),
         p("Most production agents use a combination of both, with the majority of powerful capabilities kept server-side.")
       ),
@@ -51,7 +62,7 @@ export const part1Chapters: ChapterContent[] = [
           `async function runAgent(state: AgentState) {
   while (state.iteration < state.maxIterations) {
     const decision = await grok.respond({
-      model: "grok-4.6",
+      model: "grok-4.7",
       reasoning_effort: "high",
       messages: buildContext(state),
       tools: allowedTools,
@@ -122,7 +133,18 @@ export const part1Chapters: ChapterContent[] = [
     part: PART_1,
     title: "Pricing Models, Token Economics, and Cost Management Strategy",
     subtitle: "Understand how tokens turn into real money and build systems that stay cost-predictable even as agent usage grows.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Current rates and correct usage accounting",
+        p(`${currentModel} has a ${modelContextTokens.toLocaleString("en-US")}-token context. Below ${longContextThreshold.toLocaleString("en-US")} prompt tokens, rates per million are $${textRates.short.input.toFixed(2)} input, $${textRates.short.cached.toFixed(2)} cached input, and $${textRates.short.output.toFixed(2)} output. At or above that boundary, $${textRates.long.input.toFixed(2)}, $${textRates.long.cached.toFixed(2)}, and $${textRates.long.output.toFixed(2)} apply to every token in the request.`),
+        p("Cached tokens are a subset of input tokens. Reasoning can already be included in the output total: inspect the chosen API usage fields and do not bill it twice. Add tool charges separately. Web search costs $5 per 1,000 calls; X search costs $5 per 1,000 posts fetched and $10 per 1,000 profiles fetched."),
+        p("A 10,000-input-token call with 8,000 cached tokens and 2,000 total output tokens costs $0.020 before tool fees. Consumer chat or editor subscriptions are not interchangeable with API billing."),
+        sources("2026-11-10",
+          { label: "Pricing", url: "https://docs.x.ai/developers/pricing" },
+          { label: "Models", url: "https://docs.x.ai/developers/models" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("Every call to Grok consumes tokens. In agentic systems a single user task can trigger many model calls, each carrying growing context. Without deliberate cost control, expenses scale faster than value."),
@@ -144,7 +166,7 @@ export const part1Chapters: ChapterContent[] = [
           `task_cost ≈ Σ (
   fresh_input_tokens  × input_price
 + cached_input_tokens × cached_price
-+ (output_tokens + reasoning_tokens) × output_price
++ total_billable_output_tokens × output_price
 ) + tool_fees`
         )
       ),
@@ -197,7 +219,18 @@ export const part1Chapters: ChapterContent[] = [
     part: PART_1,
     title: "Access, Authentication, Environment Setup, and Model Selection",
     subtitle: "Set up secure, reproducible access to Grok and choose the right model for each job.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Select and verify the deployed model",
+        p("Use `grok-4.7` for the current frontier coding and agentic baseline, then compare it with available alternatives on your own tasks. Listing a model in documentation does not establish your account rate limit or entitlement."),
+        p("Grok 4.7 Fast is served on faster infrastructure in Cursor and Grok Build, not on the public xAI API. Do not invent a public fast-model slug. Keep model selection configurable, record the returned model, and rerun evaluations before upgrades."),
+        p("Install `openai` for OpenAI-compatible examples or `xai-sdk` for native Python examples; use `XAI_API_KEY` only in a trusted server environment. The base endpoint remains `https://api.x.ai/v1`."),
+        sources("2026-11-10",
+          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" },
+          { label: "Models", url: "https://docs.x.ai/developers/models" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("Before you can build reliable agents you need secure authentication, a clean development environment, and a clear policy for which model to use when."),
@@ -243,13 +276,15 @@ export const grok = new OpenAI({
           "python",
           `from xai_sdk import Client
 
+import os
+
 client = Client(api_key=os.getenv("XAI_API_KEY"))`
         )
       ),
       section(
         "Model Selection Guidelines",
         ul(
-          "Use the latest flagship (Grok 4.6 or successor) for complex reasoning, coding, and agentic workloads.",
+          "Use the latest flagship (Grok 4.7 or successor) for complex reasoning, coding, and agentic workloads.",
           "Use faster or smaller variants for classification, routing, simple extraction, and high-volume low-stakes tasks.",
           "Pin model versions in production so behavior stays stable.",
           "Re-evaluate model choice when new versions are released or when cost/latency requirements change."
@@ -275,7 +310,18 @@ client = Client(api_key=os.getenv("XAI_API_KEY"))`
     part: PART_1,
     title: "The Interactive Environment and Conversational Workflows",
     subtitle: "Design smooth, stateful conversational experiences that still remain controllable and cost-aware.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Responses, continuation, and interruptible conversation",
+        p("Continue a stored conversation with `previous_response_id`, or manage history yourself by passing prior output items back in `input`. With Grok 4.7, preserve encrypted reasoning and server-tool items unchanged instead of flattening all output into text."),
+        p("Responses are stored by default and documented for 30-day retention. `store: false` changes response storage, but is not a blanket zero-data-retention contract. Your application still owns durable user history, deletion, cancellation, and recovery."),
+        p("The Responses `instructions` field cannot be combined with `previous_response_id`; the previous system prompt is reused. An edited earlier turn should start a deliberate new branch rather than silently mixing incompatible histories."),
+        sources("2026-11-10",
+          { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" },
+          { label: "Reasoning", url: "https://docs.x.ai/developers/model-capabilities/text/reasoning" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("Most users first experience Grok through interactive chat. Turning that experience into a reliable product requires careful handling of conversation state, streaming, context growth, and user experience."),
@@ -301,7 +347,7 @@ client = Client(api_key=os.getenv("XAI_API_KEY"))`
         code(
           "typescript",
           `const stream = await grok.chat.completions.create({
-  model: "grok-4.6",
+  model: "grok-4.7",
   messages,
   stream: true,
 });
@@ -335,7 +381,17 @@ for await (const chunk of stream) {
     part: PART_1,
     title: "Essential Prompt Patterns, System Instructions, and Runtime Controls",
     subtitle: "Write system prompts and interaction patterns that reliably steer Grok toward correct, safe, and useful behavior.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Use endpoint-specific runtime controls",
+        p("For OpenAI-compatible Responses requests, set `reasoning: { effort: \"low\" }`; Chat Completions uses `reasoning_effort`. Grok 4.7 defaults to high effort, not medium, and reasoning cannot be disabled."),
+        p("Do not copy parameter names across endpoints without checking the reference. Unsupported reasoning-model penalties and `stop` can cause errors. Runtime policy, not a prompt, must enforce budgets and tool access."),
+        sources("2026-11-10",
+          { label: "Reasoning", url: "https://docs.x.ai/developers/model-capabilities/text/reasoning" },
+          { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("The system prompt is the most leveraged piece of context you control. Combined with good runtime controls (reasoning effort, tool choice, response format), it determines most of an agent’s personality, reliability, and safety."),
@@ -398,7 +454,17 @@ for await (const chunk of stream) {
     part: PART_1,
     title: "High-Productivity Daily Workflows and Prompt Libraries",
     subtitle: "Turn repeated work into reusable, versioned prompt assets and efficient daily engineering habits.",
+    updatedOn: "2026-11-10",
     sections: [
+      section(
+        "Version the full workflow, not only the prompt",
+        p("Record model, endpoint, effort, tools, output schema, evaluation results, and verification date alongside each reusable template. A prompt that works in consumer chat may lack the same tools in an API application."),
+        p("In Grok Build, packaged skills use a directory containing `SKILL.md` with YAML metadata. Plain markdown templates remain useful but are not automatically identical to installed skills. Inspect discovered assets with `grok inspect`."),
+        sources("2026-11-10",
+          { label: "Skills Plugins Marketplaces", url: "https://docs.x.ai/build/features/skills-plugins-marketplaces" },
+          { label: "Overview", url: "https://docs.x.ai/build/overview" }
+        )
+      ),
       section(
         "Chapter Overview & Learning Objectives",
         p("The difference between occasional Grok use and high-leverage engineering is systematization. Experts maintain prompt libraries, standardized workflows, and tight feedback loops."),
