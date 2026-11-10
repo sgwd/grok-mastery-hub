@@ -43,6 +43,8 @@ function Block({ block }: { block: ContentBlock }) {
       return <CodeBlock code={block.code} language={block.language} />;
     case "loop":
       return <LoopDiagram />;
+    case "sources":
+      return <div className="space-y-3 text-sm"><p>Official documentation checked {block.verifiedOn}. Availability, rates, and limits may change.</p><ul className="list-disc space-y-2 pl-6 marker:text-cyan">{block.items.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer" className="text-cyan underline underline-offset-4 hover:text-foreground">{source.label}</a></li>)}</ul></div>;
   }
 }
 
@@ -243,6 +245,7 @@ export function ChapterReader({
           <div className="mt-7 flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
             <Clock3 className="size-3.5 text-primary" aria-hidden="true" /> {readMinutes} min read
             <span aria-hidden="true">·</span> {content.part}
+            {content.updatedOn && <><span aria-hidden="true">·</span><time dateTime={content.updatedOn}>Updated {content.updatedOn}</time></>}
           </div>
         </header>
 
