@@ -59,31 +59,37 @@ export const part1Chapters: ChapterContent[] = [
         p("Implement the loop in your own orchestration code rather than asking the model to simulate the entire process. Keep state explicit and append-only so every trajectory can be replayed, tested, and debugged."),
         code(
           "typescript",
-          `async function runAgent(state: AgentState) {
-  while (state.iteration < state.maxIterations) {
-    const decision = await grok.respond({
+          `// Application helpers enforce budgets, schemas, and authorization.
+async function runAgent(state: AgentState) {
+  const input = buildContext(state);
+  for (let turn = 0; turn < state.maxIterations; turn += 1) {
+    assertRemainingBudget(state);
+    const response = await grok.responses.create({
       model: "grok-4.7",
-      reasoning_effort: "high",
-      messages: buildContext(state),
+      reasoning: { effort: "high" },
+      input,
       tools: allowedTools,
+      store: false,
+      parallel_tool_calls: false,
     });
-
-    if (decision.type === "final") {
-      return decision.content;
+    recordUsage(state, response.usage);
+    // Preserve ALL typed output, including encrypted reasoning.
+    input.push(...response.output);
+    const calls = response.output.filter(
+      (item) => item.type === "function_call"
+    );
+    if (calls.length === 0) return response.output_text;
+    for (const call of calls) {
+      const args = validateToolCall(call.name, call.arguments);
+      await authorize(state.sessionId, call.name, args);
+      const result = await executeWithTimeout(call.name, args, 15_000);
+      input.push({
+        type: "function_call_output",
+        call_id: call.call_id,
+        output: JSON.stringify(result),
+      });
     }
-
-    const call = validateToolCall(decision.toolCall);
-    authorize(state.sessionId, call);
-    const result = await executeWithTimeout(call, 15_000);
-
-    state.observations.push({
-      role: "tool",
-      tool_call_id: call.id,
-      content: normalize(result),
-    });
-    state.iteration += 1;
   }
-
   return escalate("Iteration budget exhausted", state);
 }`
         ),
@@ -163,11 +169,15 @@ export const part1Chapters: ChapterContent[] = [
         p("A single request cost is almost meaningless. What matters is the total tokens consumed across every iteration of the agentic loop until the task succeeds or is abandoned."),
         code(
           "text",
-          `task_cost ≈ Σ (
+          `# Prices below are USD per million tokens.
+task_cost ≈ Σ (
   fresh_input_tokens  × input_price
 + cached_input_tokens × cached_price
 + total_billable_output_tokens × output_price
-) + tool_fees`
+) / 1_000_000 + tool_fees
+
+# fresh_input = total_input - cached_input
+# Do not add reasoning again if already included in total output.`
         )
       ),
       section(
@@ -178,7 +188,7 @@ export const part1Chapters: ChapterContent[] = [
           "**Model routing** — Send simple classification or extraction tasks to a faster/cheaper model; reserve the flagship for hard reasoning.",
           "**Reasoning effort tuning** — Lower effort dramatically reduces hidden reasoning tokens on routine turns.",
           "**Hard budgets** — Enforce maximum tokens or dollars per task and per day in code.",
-          "**Output discipline** — Ask for concise structured output and set reasonable max_tokens limits."
+          "**Output discipline** — Request concise structured output and enforce endpoint-supported response limits, deadlines, and total task budgets."
         )
       ),
       section(
@@ -346,14 +356,17 @@ client = Client(api_key=os.getenv("XAI_API_KEY"))`
         p("Always stream when the user is waiting. Streaming reduces perceived latency and allows the interface to show partial progress (including tool calls in real time)."),
         code(
           "typescript",
-          `const stream = await grok.chat.completions.create({
+          `const stream = await grok.responses.create({
   model: "grok-4.7",
-  messages,
+  input: [{ role: "user", content: "Explain this test failure." }],
+  reasoning: { effort: "low" },
   stream: true,
 });
 
-for await (const chunk of stream) {
-  process.stdout.write(chunk.choices[0]?.delta?.content || "");
+for await (const event of stream) {
+  if (event.type === "response.output_text.delta") {
+    process.stdout.write(event.delta);
+  }
 }`
         )
       ),

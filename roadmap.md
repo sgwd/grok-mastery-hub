@@ -9,4 +9,4 @@
 - [x] Replace Chapter 1 placeholder material with complete technical content
 - [x] Clarify chapter grouping, appendix labels, and sequential navigation
 - [x] Verify chapter directory and reading order on desktop and mobile
-- [ ] Refresh all chapters and appendices against official documentation and verify reading navigation
+- [x] Refresh all chapters and appendices against official documentation and verify reading navigation
