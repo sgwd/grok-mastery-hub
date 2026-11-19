@@ -8,13 +8,13 @@ export const part2Chapters: ChapterContent[] = [
     part: PART_2,
     title: "Persistent Memory Systems and Project Context Architecture",
     subtitle: "Give Grok durable knowledge of your project so every session starts informed instead of from zero.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Separate retained responses from durable project knowledge",
         p("Stored response continuation and encrypted reasoning help maintain a conversation; they do not replace an application-owned memory store with provenance, access control, and deletion rules."),
         p("Grok Build loads `AGENTS.md` and `.grok/rules/*.md` using directory-scoped discovery. A `.grok/context/` directory is an application convention: explicitly load its relevant documents rather than assuming every file is discovered."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Project Rules", url: "https://docs.x.ai/build/features/project-rules" },
           { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" }
         )
@@ -59,7 +59,7 @@ export const part2Chapters: ChapterContent[] = [
 
 ## Key Decisions
 - 2026-03-12: Moved order processing to event sourcing (audit + replay requirements)
-- 2026-05-03: Adopted Grok 4.7 as the primary coding model
+- 2026-09-22: Adopted Grok 4.7 as the primary coding model
 
 ## Open Questions
 - Should we introduce a read replica for reporting?`
@@ -114,13 +114,13 @@ export const part2Chapters: ChapterContent[] = [
     part: PART_2,
     title: "Structuring Inputs (Markdown, JSON, code) for Optimal Grok Consumption",
     subtitle: "Format what you send so Grok can parse, prioritize, and act on it with minimal ambiguity.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Preserve typed artifacts and trust boundaries",
         p("Readable delimiters label untrusted material but do not create a security boundary. Validate external data and keep tool authority separate from quoted instructions."),
         p("When using Responses, preserve structured function calls, outputs, and encrypted items in their native form. Flattening them into markdown discards protocol metadata needed for continuation."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Function Calling", url: "https://docs.x.ai/developers/tools/function-calling" },
           { label: "Reasoning", url: "https://docs.x.ai/developers/model-capabilities/text/reasoning" }
         )
@@ -204,15 +204,15 @@ Received: 1199
     part: PART_2,
     title: "Advanced Memory Enhancement, Retrieval, and Persistence Techniques",
     subtitle: "Combine retrieval, summarization, and structured stores so agents can recall the right information at any scale.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Retrieval access control comes before relevance",
         p("The built-in Collections Search tool searches uploaded knowledge; custom hybrid retrieval is still useful when you need application-specific ranking or storage. Do not assume provider search replaces document permissions."),
         p("Check user and tenant access before inserting a retrieved result into context. Store source IDs, revision dates, and deletion status; a high similarity score does not establish truth or authorization."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Overview", url: "https://docs.x.ai/developers/tools/overview" },
-          { label: "Remote Mcp", url: "https://docs.x.ai/developers/tools/remote-mcp" }
+          { label: "Remote MCP", url: "https://docs.x.ai/developers/tools/remote-mcp" }
         )
       ),
       section(
@@ -283,14 +283,14 @@ Received: 1199
     part: PART_2,
     title: "Context Engineering: Token Budgeting, Truncation Strategies, Context Compaction, and Long-Context Optimization",
     subtitle: "Treat the context window as a scarce, expensive resource and allocate it deliberately.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Native compaction and the long-context price cliff",
         p("Grok 4.7 has a 500,000-token window, but its long-context pricing starts at 200,000 prompt tokens. A technically valid context can still incur higher rates across the entire request."),
         p("The dedicated `/v1/responses/compact` endpoint produces an opaque compaction item. Pass its output unchanged into the next request. Compact before reaching the context limit: compaction cannot repair a request that is already oversized."),
-        p("Do not assume a `context_management` directive on an ordinary request performs compaction; the current reference lists directives as parsed but not executed. Use the documented compaction endpoint or explicit application-managed summaries."),
-        sources("2026-11-10",
+        p("Use the documented compaction endpoint or explicit application-managed summaries. Do not infer automatic compaction merely from an OpenAI-compatible parameter name; verify the chosen endpoint and client behavior."),
+        sources("2026-11-19",
           { label: "Context Compaction", url: "https://docs.x.ai/developers/advanced-api-usage/context-compaction" },
           { label: "Pricing", url: "https://docs.x.ai/developers/pricing" },
           { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" }
@@ -310,7 +310,7 @@ Received: 1199
         "Token Budgeting Framework",
         code(
           "text",
-          `Example 128k window budget
+          `Example application budget: 128k within Grok 4.7’s 500k window
 ├── System + tools          6–8k   (stable, cached)
 ├── Project memory          4–8k
 ├── Retrieved knowledge    20–40k
@@ -361,13 +361,13 @@ Received: 1199
     part: PART_2,
     title: "Tools, Permissions, Function Calling, and Security Guardrails",
     subtitle: "Give Grok real capabilities while keeping authority, validation, and safety firmly under your control.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Schema conformance is not authorization",
         p("Current xAI structured-output documentation describes strict tool arguments within its supported JSON Schema subset. Still validate business rules, resource ownership, allowed transitions, and the current approval before execution."),
         p("The API term client-side function means your caller executes it, usually on your backend; it does not mean secrets should go into browser code. Provider built-in tools are a separate execution boundary."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Structured Outputs", url: "https://docs.x.ai/developers/model-capabilities/text/structured-outputs" },
           { label: "Function Calling", url: "https://docs.x.ai/developers/tools/function-calling" }
         )
@@ -388,7 +388,7 @@ Received: 1199
         ul(
           "Prefer many narrow tools over a few overly powerful ones.",
           "Write precise descriptions — the model relies on them for selection.",
-          "Use strict JSON Schema (types, enums, minimum/maximum, required fields).",
+          "Use the supported JSON Schema subset for tool arguments; enforce numerical limits and business rules again in application code.",
           "Make side-effects explicit in the tool description.",
           "Return structured errors the model can understand and recover from."
         ),
@@ -447,13 +447,13 @@ Received: 1199
     part: PART_2,
     title: "Extended Thinking, Chain-of-Thought, Reasoning Effort Levels, and Multi-Step Reasoning Modes",
     subtitle: "Control how deeply Grok thinks and structure hard problems so that extra reasoning actually improves outcomes.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Effort defaults and encrypted reasoning",
         p("Grok 4.7 supports low, medium, high, and xhigh; high is the default and reasoning cannot be disabled. xhigh is supported on Grok 4.6 and later; Grok 4.5 treats xhigh as high."),
         p("Encrypted reasoning is an opaque continuation artifact, not a readable chain-of-thought or audit explanation. Preserve it unchanged. Evaluate observable evidence, concise rationale, tool choices, and verified results instead of requesting hidden thinking."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Reasoning", url: "https://docs.x.ai/developers/model-capabilities/text/reasoning" }
         )
       ),
@@ -472,7 +472,7 @@ Received: 1199
         "Understanding Reasoning Effort",
         ul(
           "**Low** — Classification, routing, formatting, simple extraction, lightweight tool use.",
-          "**Medium** — Typical coding, analysis, and most production agent turns.",
+          "**Medium** — A lower-effort option for coding and analysis when evaluations support it; Grok 4.7 defaults to high.",
           "**High** — Complex debugging, architecture decisions, ambiguous planning, hard reasoning.",
           "**xhigh** — Reserved for the most difficult problems where maximum depth is justified."
         ),
@@ -534,13 +534,13 @@ Do not continue until I confirm.`
     part: PART_2,
     title: "Autonomous Research, Code Exploration, Web Search, X Search, and Deep Investigation",
     subtitle: "Build research agents that can search the web, X, and codebases, then synthesize grounded, well-cited conclusions.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Ground research with configured tools and actual fetch costs",
         p("Explicitly enable `web_search` and `x_search` for supported requests; do not assume every Grok conversation has those capabilities. Keep citation annotations and confirm that a source supports each important claim."),
         p("Use date ranges and targeted queries for freshness. Budget X research by posts and profiles fetched, not just search turns, and web research by tool invocations plus tokens. Cross-check social claims against primary sources."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Web Search", url: "https://docs.x.ai/developers/tools/web-search" },
           { label: "X Search", url: "https://docs.x.ai/developers/tools/x-search" },
           { label: "Pricing", url: "https://docs.x.ai/developers/pricing" }

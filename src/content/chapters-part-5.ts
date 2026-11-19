@@ -8,14 +8,14 @@ export const part5Chapters: ChapterContent[] = [
     part: PART_5,
     title: "Real-World Engineering Recipes (Refactoring, TDD, Bug Hunting, Upgrades, Large Codebase Navigation)",
     subtitle: "Battle-tested workflows for the most common high-value engineering tasks.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Upgrade the model like any other dependency",
         p("Before replacing the model or SDK, replay bug, refactor, test-generation, and upgrade tasks against the old and new settings. Compare correctness, tool behavior, cost, and latency together."),
         p("Let repository rules define build and test commands. Native Grok Build can discover scoped `AGENTS.md` files; API agents must explicitly receive the same constraints."),
-        sources("2026-11-10",
-          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" },
+        sources("2026-11-19",
+          { label: "Grok 4.7", url: "https://docs.x.ai/developers/grok-4-7" },
           { label: "Project Rules", url: "https://docs.x.ai/build/features/project-rules" }
         )
       ),
@@ -101,14 +101,14 @@ export const part5Chapters: ChapterContent[] = [
     part: PART_5,
     title: "8 Pro Power Moves for High-Speed AI Engineering with Grok",
     subtitle: "High-leverage techniques that experienced practitioners use to multiply speed and quality.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Make the power moves measurable",
         p("For Grok 4.7, the developer guide recommends a stable `prompt_cache_key` to improve conversation routing and cache reliability. Keep prefixes stable too, and measure actual cached-input usage rather than assuming a hit."),
         p("Replace blind aggressive summarization with tested compaction. Preserve opaque encrypted continuation items and check that critical constraints, unresolved work, and tool evidence survive."),
-        sources("2026-11-10",
-          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" },
+        sources("2026-11-19",
+          { label: "Grok 4.7", url: "https://docs.x.ai/developers/grok-4-7" },
           { label: "Context Compaction", url: "https://docs.x.ai/developers/advanced-api-usage/context-compaction" }
         )
       ),
@@ -162,13 +162,13 @@ export const part5Chapters: ChapterContent[] = [
     part: PART_5,
     title: "Multi-Grok Workflows and Agent Swarms",
     subtitle: "Coordinate multiple Grok instances for parallel exploration, critique, and high-stakes decisions.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Budget the swarm and test the judge",
         p("Document whether you are using multiple API requests, native CLI subagents, or a provider multi-agent model. They have different coordination, tool, and cost behavior; no one setting enables all three."),
         p("Use held-out tasks to evaluate selection quality. Agreement between agents is not proof, and correlated mistakes can survive a vote. Verify claims against source evidence and deterministic checks."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Models", url: "https://docs.x.ai/developers/models" },
           { label: "Subagents", url: "https://docs.x.ai/build/features/subagents" }
         )
@@ -223,13 +223,15 @@ export const part5Chapters: ChapterContent[] = [
     part: PART_5,
     title: "Checkpoints, State Recovery, Session Continuity, and Long-Running Background Tasks",
     subtitle: "Make long-running and background agents durable, recoverable, and safe across restarts and days.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Distinguish CLI background tasks from durable jobs",
         p("Grok Build supports background commands, subagents, monitors, and recurring `/loop` prompts. These are not a substitute for a durable workflow engine with recovery and persistent ownership."),
+        p("Grok Bot is a separate hosted product with persistent cloud computers, approvals, connectors, and routines. Do not confuse its durable environment with CLI background processes or API response retention; review its access and data policies before delegation."),
         p("Persist application task state and reconcile external effects after a restart. Responses storage defaults to 30 days; do not use a provider response ID as the sole checkpoint for a longer-lived job. The current Responses `background` field is unsupported."),
-        sources("2026-11-10",
+        sources("2026-11-19",
+          { label: "Grok Bot overview", url: "https://docs.x.ai/grok-bot/overview" },
           { label: "Background Tasks", url: "https://docs.x.ai/build/features/background-tasks" },
           { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" }
         )
@@ -297,16 +299,18 @@ export const part5Chapters: ChapterContent[] = [
     part: PART_5,
     title: "Enterprise Security, Governance, Telemetry, and Performance Tuning",
     subtitle: "Operate Grok-powered systems at organisational scale with proper controls, visibility, and efficiency.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Document retention and deployment boundaries",
         p("Record the exact endpoint, response-storage policy, and contractual data controls for each workload. `store: false` is not a blanket promise that no data is retained anywhere."),
         p("The documented US regional endpoint is `https://us.api.x.ai/v1`, with a 10% token-price premium. Data residency requirements still need a documented end-to-end policy for tools, logs, retrieval, and backups."),
+        p("Send an application-assigned `safety_identifier` for each end user: use a stable opaque value or hash, never an email address, phone number, or display name. This scopes abuse attribution; it is not authentication or permission to act."),
         p("Moderation controls guide generated content; they do not replace authorization, data classification, or sandbox restrictions. Track account quotas and model upgrades through a governed rollout."),
-        sources("2026-11-10",
-          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" },
+        sources("2026-11-19",
+          { label: "Grok 4.7", url: "https://docs.x.ai/developers/grok-4-7" },
           { label: "Pricing", url: "https://docs.x.ai/developers/pricing" },
+          { label: "Security FAQ", url: "https://docs.x.ai/developers/faq/security" },
           { label: "Release Notes", url: "https://docs.x.ai/developers/release-notes" }
         )
       ),
@@ -371,15 +375,15 @@ export const part5Chapters: ChapterContent[] = [
     part: PART_5,
     title: "Evaluation, Observability, Benchmarking, and Continuous Improvement of Agentic Systems",
     subtitle: "Measure agent quality rigorously and build a loop that makes the system better every week.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Evaluate upgrades and opaque continuation",
         p("Include representative cases for Grok 4.7 effort levels, long-context pricing, malformed external data, continuation, and tool failures in the regression set."),
         p("Score observable trajectories: requested tools, validation, approval, recovered failures, and verified outcomes. Hidden reasoning is not an inspectable correctness oracle. Report success with cost and latency distributions."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Reasoning", url: "https://docs.x.ai/developers/model-capabilities/text/reasoning" },
-          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" }
+          { label: "Grok 4.7", url: "https://docs.x.ai/developers/grok-4-7" }
         )
       ),
       section(
@@ -446,13 +450,14 @@ export const part5Chapters: ChapterContent[] = [
     part: PART_BONUS,
     title: "Loop Engineering Supplement – Building Fully Autonomous, Self-Improving Background Loops with Grok",
     subtitle: "Design autonomous loops that observe, act, verify, and improve over time — safely and under control.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Native scheduling has bounded lifetime",
         p("Grok Build `/loop` runs immediately and then on a recurring interval. The documented minimum is 60 seconds, loops expire after 7 days, and at most 50 scheduled tasks can be active. These limits apply to native CLI scheduling, not to your own workflow engine."),
         p("For continuously operated services, use durable scheduling, ownership leases, checkpoints, and application-enforced approval. Native hooks fail open on operational failures, so keep critical policy in a harder boundary."),
-        sources("2026-11-10",
+        sources("2026-11-19",
+          { label: "Grok Bot overview", url: "https://docs.x.ai/grok-bot/overview" },
           { label: "Background Tasks", url: "https://docs.x.ai/build/features/background-tasks" },
           { label: "Hooks", url: "https://docs.x.ai/build/features/hooks" }
         )

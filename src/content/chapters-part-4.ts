@@ -8,13 +8,13 @@ export const part4Chapters: ChapterContent[] = [
     part: PART_4,
     title: "Git Workflows, Branching Strategies, and Automated Commits with Grok",
     subtitle: "Use Grok to improve commit quality, branch hygiene, and pull-request descriptions while keeping humans in control of shared history.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Keep repository automation scoped and reviewable",
         p("Use Grok Build or API tooling to draft commit messages and PR descriptions from bounded diffs. Agent permission settings and branch protection remain independent controls."),
         p("Inspect repository rules before invoking automation. Treat instruction files and hooks from untrusted repositories as executable-risk inputs; project hooks and tool servers require explicit trust."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Project Rules", url: "https://docs.x.ai/build/features/project-rules" },
           { label: "Hooks", url: "https://docs.x.ai/build/features/hooks" },
           { label: "Permissions", url: "https://docs.x.ai/build/features/permissions" }
@@ -80,16 +80,21 @@ export const part4Chapters: ChapterContent[] = [
     part: PART_4,
     title: "CI/CD Integration (GitHub Actions and beyond)",
     subtitle: "Embed Grok agents safely into continuous integration and delivery pipelines.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Build headless CI with reproducible settings",
         p("Use documented headless CLI options or a server-side API client rather than driving an interactive terminal in CI. Record model, effort, skill revision, and resolved configuration in job artifacts."),
+        code("bash", `# Run only in an isolated, read-only checkout with reviewed permissions.
+grok --no-auto-update -m grok-4.7 \
+  -p "Review the supplied diff and cite concrete defects; do not edit files." \
+  --output-format json`),
+        p("Pin the CLI installation separately. Do not use `--always-approve` as a CI convenience; prompt wording is not an access-control boundary."),
         p("Keep fork PR analysis read-only and separate untrusted code execution from credentialed model calls. A model review is advisory unless a deliberate merge policy and evaluated rubric make it a required check."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Headless Scripting", url: "https://docs.x.ai/build/cli/headless-scripting" },
           { label: "Settings", url: "https://docs.x.ai/build/settings" },
-          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" }
+          { label: "Grok 4.7", url: "https://docs.x.ai/developers/grok-4-7" }
         )
       ),
       section(
@@ -154,13 +159,13 @@ export const part4Chapters: ChapterContent[] = [
     part: PART_4,
     title: "Code Review Workflows, Static Analysis, and PR Automation",
     subtitle: "Combine Grok with traditional static analysis to create high-signal, low-noise pull-request review systems.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Review evidence, not inferred hidden thinking",
         p("Give the reviewer deterministic analysis results, changed line ranges, and project rules. Require each finding to cite a concrete location and explain an observable failure."),
         p("Use schema-enforced findings but independently validate locations and severity. Encrypted reasoning is not a review transcript; replayable tool results, test output, and human overrides form the audit record."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Structured Outputs", url: "https://docs.x.ai/developers/model-capabilities/text/structured-outputs" },
           { label: "Reasoning", url: "https://docs.x.ai/developers/model-capabilities/text/reasoning" }
         )
@@ -228,15 +233,15 @@ Raw diff + project context`
     part: PART_4,
     title: "Grok API / SDK Deep Dive (Python, TypeScript, and other clients)",
     subtitle: "Build production-grade clients against the xAI API with proper error handling, streaming, and observability.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Responses-first SDK integration",
         p("The current developer docs recommend the Responses API for text generation, reasoning, and tool use. OpenAI-compatible clients use `https://api.x.ai/v1`; the native Python package remains `xai-sdk`."),
         p("Keep endpoint-specific controls in a thin wrapper. Retry only transient failures with a deadline, honor available retry guidance, and never replay side-effecting tool work without reconciling its idempotency key."),
         p("Retain usage and output item metadata, not just final text. Stored-response continuation, manual encrypted-history continuation, and native compaction each need integration tests."),
-        sources("2026-11-10",
-          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" },
+        sources("2026-11-19",
+          { label: "Grok 4.7", url: "https://docs.x.ai/developers/grok-4-7" },
           { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" },
           { label: "Function Calling", url: "https://docs.x.ai/developers/tools/function-calling" }
         )
@@ -296,14 +301,14 @@ Raw diff + project context`
     part: PART_4,
     title: "IDE Integrations (VS Code, JetBrains, Cursor, terminal, and editor setups)",
     subtitle: "Make Grok feel like a natural part of the editor while keeping skills, memory, and policy consistent.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Verify editor capabilities instead of assuming parity",
         p("The Grok 4.7 guide lists Cursor availability and Grok Build as supported coding surfaces. Other editors need an extension or external tool that supports the relevant endpoint; check tool, streaming, and schema support."),
         p("Grok 4.7 Fast is an editor/CLI offering, not a public API variant. Editor plan billing and API costs differ, so benchmark the actual surface your team deploys."),
-        sources("2026-11-10",
-          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" },
+        sources("2026-11-19",
+          { label: "Grok 4.7", url: "https://docs.x.ai/developers/grok-4-7" },
           { label: "Overview", url: "https://docs.x.ai/build/overview" }
         )
       ),

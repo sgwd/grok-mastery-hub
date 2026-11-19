@@ -1,7 +1,19 @@
 import { describe, expect, test } from "bun:test";
-import { estimateTextCost, longContextThreshold, modelContextTokens, textRates } from "./verified-reference";
+import { deliveryMultipliers, estimateTextCost, longContextThreshold, modelContextTokens, textRates } from "./verified-reference";
 
 describe("verified Grok 4.7 text economics", () => {
+  test("applies the published 20 percent batch discount", () => {
+    expect(deliveryMultipliers.batch).toBe(0.8);
+    expect(estimateTextCost({ input: 10_000, cached: 8_000, output: 2_000 }) * deliveryMultipliers.batch).toBeCloseTo(0.016);
+  });
+  test("uses a two-times priority token rate", () => {
+    expect(deliveryMultipliers.priority).toBe(2);
+    expect(estimateTextCost({ input: 10_000, cached: 8_000, output: 2_000 }) * deliveryMultipliers.priority).toBeCloseTo(0.04);
+  });
+  test("uses the ten percent US regional premium", () => {
+    expect(deliveryMultipliers.usRegional).toBe(1.1);
+    expect(estimateTextCost({ input: 10_000, cached: 8_000, output: 2_000 }) * deliveryMultipliers.usRegional).toBeCloseTo(0.022);
+  });
   test("supports a 500,000 token window", () => {
     expect(modelContextTokens).toBe(500_000);
   });

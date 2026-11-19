@@ -1,4 +1,4 @@
-import { currentModel, modelContextTokens, textRates, longContextThreshold } from "./verified-reference";
+import { currentModel, modelContextTokens, textRates, longContextThreshold, deliveryMultipliers } from "./verified-reference";
 import { code, h3, sources, ol, p, quote, section, ul, type ChapterContent } from "./chapter-types";
 
 export const PART_APPENDICES = "Appendices";
@@ -13,14 +13,15 @@ export const appendices: Appendix[] = [
     part: PART_APPENDICES,
     title: "Appendix A: Essential Prompt & Skill Library",
     subtitle: "Ready-to-use templates for the most common high-leverage engineering tasks.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Turn copied templates into native skills",
         p("Use `.grok/skills/<name>/SKILL.md` with YAML metadata when packaging for Grok Build. A plain prompt copied into a chat remains a template, not necessarily a discovered native skill."),
+        p("Native skill metadata does not enforce authority: `allowed-tools` does not grant or restrict tools, and `model`/`effort` keys are accepted but not applied. Use runtime configuration and permissions for these controls."),
         p("Keep a reviewed schema, least-privilege tool list, model/effort recommendation, and example failures with each skill. Inspect discovery before relying on it in automation."),
-        sources("2026-11-10",
-          { label: "Skills Plugins Marketplaces", url: "https://docs.x.ai/build/features/skills-plugins-marketplaces" }
+        sources("2026-11-19",
+          { label: "Skills, Plugins & Marketplaces", url: "https://docs.x.ai/build/features/skills-plugins-marketplaces" }
         )
       ),
       section(
@@ -36,7 +37,12 @@ export const appendices: Appendix[] = [
         "Skill: Code Review",
         code(
           "markdown",
-          `# code-review
+          `---
+name: code-review
+description: Review a diff for correctness, security, and tests.
+---
+
+# code-review
 
 You are a senior staff engineer performing a thorough code review.
 
@@ -59,7 +65,12 @@ Respond with a structured review containing severity (blocker / major / minor / 
         "Skill: Bug Investigation",
         code(
           "markdown",
-          `# bug-investigation
+          `---
+name: bug-investigation
+description: Diagnose failures using falsifiable hypotheses.
+---
+
+# bug-investigation
 
 You are investigating a production or test failure.
 
@@ -77,7 +88,12 @@ Logs / stack trace:
         "Skill: PR Description",
         code(
           "markdown",
-          `# pr-description
+          `---
+name: pr-description
+description: Draft a pull-request summary from commits and a diff.
+---
+
+# pr-description
 
 Write a clear pull-request description from the following commits and diff.
 
@@ -98,7 +114,12 @@ Diff summary:
         "Skill: Refactor Plan",
         code(
           "markdown",
-          `# refactor-plan
+          `---
+name: refactor-plan
+description: Plan a behavior-preserving refactor with tests.
+---
+
+# refactor-plan
 
 Propose a step-by-step refactoring plan that preserves existing behaviour.
 
@@ -132,14 +153,14 @@ Target:
     part: PART_APPENDICES,
     title: "Appendix B: Glossary of Agentic Engineering Terms",
     subtitle: "Precise definitions of the key concepts used throughout the guide.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Current API vocabulary",
         p("**Responses API** — The primary text, reasoning, and tool interface; it returns typed output items rather than only a message string."),
         p("**Encrypted reasoning** — An opaque continuation artifact, not readable chain-of-thought. **Compaction item** — An opaque replacement for older context, passed back unchanged."),
         p("**Client-side function** — A tool executed by the API caller, often a trusted backend, not necessarily a web browser. **Long-context threshold** — A billing boundary distinct from the context-window limit."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Responses", url: "https://docs.x.ai/developers/rest-api-reference/inference/responses" },
           { label: "Function Calling", url: "https://docs.x.ai/developers/tools/function-calling" },
           { label: "Context Compaction", url: "https://docs.x.ai/developers/advanced-api-usage/context-compaction" }
@@ -194,17 +215,18 @@ Target:
     part: PART_APPENDICES,
     title: "Appendix C: Grok Model & Pricing Quick Reference",
     subtitle: "Practical notes on model selection and cost awareness (always verify against current official pricing).",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Verified model and pricing snapshot",
         p(`${currentModel}: ${modelContextTokens.toLocaleString("en-US")}-token context; low, medium, high (default), and xhigh reasoning. Below ${longContextThreshold.toLocaleString("en-US")} prompt tokens, rates per million are $${textRates.short.input.toFixed(2)} input, $${textRates.short.cached.toFixed(2)} cached input, and $${textRates.short.output.toFixed(2)} output. At or above the boundary: $${textRates.long.input.toFixed(2)}, $${textRates.long.cached.toFixed(2)}, and $${textRates.long.output.toFixed(2)} for all tokens.`),
+        p(`Delivery reference: Grok 4.7 Batch token charges use ${deliveryMultipliers.batch}× standard rates; confirmed priority requests use ${deliveryMultipliers.priority}×; US regional inference uses ${deliveryMultipliers.usRegional}×. Check eligibility before applying any multiplier. Editor-only Fast is billed through the editor or CLI plan, not a public API model ID.`),
         p("Alternatives in the current table include `grok-4.3` with 1M context and `grok-build-0.1` with 256k context. Compare capabilities and entitlement before substitution; a larger window does not imply higher quality."),
         p("Tool charges: web search $5/1,000 calls; code execution $5/1,000 calls; Collections Search $2.50/1,000 calls; X search $5/1,000 posts plus $10/1,000 profiles. Token costs are additional."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Pricing", url: "https://docs.x.ai/developers/pricing" },
           { label: "Models", url: "https://docs.x.ai/developers/models" },
-          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" }
+          { label: "Grok 4.7", url: "https://docs.x.ai/developers/grok-4-7" }
         )
       ),
       section(
@@ -227,7 +249,7 @@ Target:
       section(
         "Practical Tips",
         ul(
-          "Pin model versions in production for stability.",
+          "Prefer documented versioned IDs when available; aliases can change and still require regression monitoring.",
           "Re-evaluate model choice when new versions ship or when cost/latency requirements change.",
           "Always check the official xAI documentation for the latest pricing and model list — numbers change."
         ),
@@ -243,14 +265,14 @@ Target:
     part: PART_APPENDICES,
     title: "Appendix D: Context, Tools & Reasoning Cheatsheet",
     subtitle: "Quick reference for the controls you will use most often.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Correct defaults and endpoint spelling",
         p("Grok 4.7 defaults to high effort. Responses uses `reasoning: { effort: \"medium\" }`; Chat Completions uses `reasoning_effort: \"medium\"`. Reasoning cannot be disabled."),
         p("Responses function results use `function_call_output` with `call_id`. Preserve encrypted output items. Native compaction uses `/v1/responses/compact`; do not modify the returned compaction item."),
         p("Use `parallel_tool_calls: false` when ordering matters. A schema-valid tool argument still requires authorization, ownership checks, and a current approval."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Reasoning", url: "https://docs.x.ai/developers/model-capabilities/text/reasoning" },
           { label: "Function Calling", url: "https://docs.x.ai/developers/tools/function-calling" },
           { label: "Context Compaction", url: "https://docs.x.ai/developers/advanced-api-usage/context-compaction" }
@@ -309,15 +331,15 @@ Output reserve       10–15%`
     part: PART_APPENDICES,
     title: "Appendix E: Recommended Project & Repository Structure",
     subtitle: "A practical layout that keeps skills, memory, and configuration consistent.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Discovery paths versus repository conventions",
         p("Grok Build rules: `AGENTS.md` and `.grok/rules/*.md`. Skills: `.grok/skills/<name>/SKILL.md`. Agents: `.grok/agents/`. Hooks: `.grok/hooks/*.json`, requiring project trust."),
         p("Project `.grok/config.toml` supports MCP, plugins, and permission rules; general personal defaults belong in `~/.grok/config.toml`. A `.grok/context/` directory is a suggested memory convention, not automatic rule discovery."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Project Rules", url: "https://docs.x.ai/build/features/project-rules" },
-          { label: "Skills Plugins Marketplaces", url: "https://docs.x.ai/build/features/skills-plugins-marketplaces" },
+          { label: "Skills, Plugins & Marketplaces", url: "https://docs.x.ai/build/features/skills-plugins-marketplaces" },
           { label: "Settings", url: "https://docs.x.ai/build/settings" },
           { label: "Hooks", url: "https://docs.x.ai/build/features/hooks" }
         )
@@ -337,7 +359,7 @@ Output reserve       10–15%`
 │   │   ├── architecture.md
 │   │   └── open-questions.md
 │   ├── hooks/               # optional lifecycle hooks
-│   └── config.toml          # optional project overrides
+│   └── config.toml          # MCP, plugins, permission rules
 ├── AGENTS.md                # high-level agent instructions
 ├── docs/
 ├── src/
@@ -372,16 +394,16 @@ Output reserve       10–15%`
     part: PART_APPENDICES,
     title: "Appendix F: Common Failure Modes & Mitigations Catalog",
     subtitle: "A practical catalogue of the ways agentic systems fail and how to defend against them.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Add current-platform failure cases",
         p("**Price cliff** → Test 199,999 and 200,000 prompt tokens and count cached input only once. **Missing continuation** → Preserve typed and encrypted output rather than flattening to text."),
         p("**Unsupported approval** → Remote MCP approval parameters do not enforce a human gate. **Hook failure** → Crash and timeout tests must prove the independent permission boundary still blocks unsafe actions."),
         p("**Expired checkpoint** → Persist application state separately from 30-day stored responses. **Oversized compaction request** → Trigger compaction while history still fits the window."),
-        sources("2026-11-10",
+        sources("2026-11-19",
           { label: "Pricing", url: "https://docs.x.ai/developers/pricing" },
-          { label: "Remote Mcp", url: "https://docs.x.ai/developers/tools/remote-mcp" },
+          { label: "Remote MCP", url: "https://docs.x.ai/developers/tools/remote-mcp" },
           { label: "Hooks", url: "https://docs.x.ai/build/features/hooks" },
           { label: "Context Compaction", url: "https://docs.x.ai/developers/advanced-api-usage/context-compaction" }
         )
@@ -437,14 +459,15 @@ Output reserve       10–15%`
     part: PART_APPENDICES,
     title: "Appendix G: Resources & Further Learning",
     subtitle: "Curated pointers for going deeper.",
-    updatedOn: "2026-11-10",
+    updatedOn: "2026-11-19",
     sections: [
       section(
         "Keep a primary-source update routine",
+        p("As of November 19, the newest listed API release is the November 2 image-model migration: `grok-imagine-image-quality` and `grok-imagine-image-pro` are served by Image 2.0 low quality. October releases added moderation guidelines and Voice 3.0; `grok-voice-latest` now points to Voice 3.0. Grok 4.7 remains the listed flagship for coding and text agents; these separate modality changes do not imply a new text model."),
         p("Use the linked model guide and release notes to check availability, deprecations, and changed defaults. Consult endpoint-specific references before copying an example between SDKs."),
         p("Review pricing and tools before estimating a workflow. Re-run representative evaluations when a model, SDK, tool schema, or policy changes; record the verification date with the revised material."),
-        sources("2026-11-10",
-          { label: "Grok 4 7", url: "https://docs.x.ai/developers/grok-4-7" },
+        sources("2026-11-19",
+          { label: "Grok 4.7", url: "https://docs.x.ai/developers/grok-4-7" },
           { label: "Release Notes", url: "https://docs.x.ai/developers/release-notes" },
           { label: "Pricing", url: "https://docs.x.ai/developers/pricing" },
           { label: "Overview", url: "https://docs.x.ai/developers/tools/overview" },
